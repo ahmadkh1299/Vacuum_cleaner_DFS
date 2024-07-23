@@ -6,7 +6,7 @@
 
 class House {
 public:
-    House(const std::string& filePath);
+    House(const std::string& filePath = ""); // Default parameter for constructor
     bool isValid() const;
     int getMaxSteps() const;
     int getMaxBattery() const;

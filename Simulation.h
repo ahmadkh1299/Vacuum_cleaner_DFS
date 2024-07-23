@@ -5,6 +5,8 @@
 #include "ConcreteSensors.h"
 #include "abstract_algorithm.h"
 #include <memory>
+#include <vector>
+#include <string>
 
 class Simulation {
 public:
@@ -12,6 +14,7 @@ public:
     void readHouseFile(const std::string& houseFilePath);
     void setAlgorithm(AbstractAlgorithm& algo);
     void run();
+    void writeOutputFile(const std::string& outputFilePath);
 
 private:
     House house;
@@ -20,8 +23,12 @@ private:
     std::unique_ptr<ConcreteBatteryMeter> batteryMeter;
     AbstractAlgorithm* algorithm;
     int currentRow, currentCol;
+    int steps;
+    std::vector<Step> stepHistory;
 
     void moveRobot(Direction d);
+    int calculateDirtLeft() const;
+    std::string stepToString(Step step) const;
 };
 
 #endif // SIMULATION_H

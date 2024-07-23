@@ -1,8 +1,9 @@
 #include "Simulation.h"
 #include <iostream>
+#include <fstream>
 
 Simulation::Simulation()
-        : house(""), currentRow(0), currentCol(0), algorithm(nullptr) {}
+        : house(""), currentRow(0), currentCol(0), algorithm(nullptr), steps(0) {}
 
 void Simulation::readHouseFile(const std::string& houseFilePath) {
     house = House(houseFilePath);
@@ -28,9 +29,9 @@ void Simulation::setAlgorithm(AbstractAlgorithm& algo) {
 }
 
 void Simulation::run() {
-    int steps = 0;
     while (steps < house.getMaxSteps() && batteryMeter->getBatteryState() > 0) {
         Step step = algorithm->nextStep();
+        stepHistory.push_back(step);
         if (step == Step::Finish) {
             break;
         }
@@ -82,4 +83,50 @@ void Simulation::moveRobot(Direction d) {
             if (currentCol > 0 && !wallsSensor->isWall(Direction::West)) currentCol--;
             break;
     }
+}
+
+int Simulation::calculateDirtLeft() const {
+    int totalDirt = 0;
+    for (int i = 0; i < house.getRows(); ++i) {
+        for (int j = 0; j < house.getCols(); ++j) {
+            char cell = house.getCell(i, j);
+            if (cell >= '1' && cell <= '9') {
+                totalDirt += cell - '0';
+            }
+        }
+    }
+    return totalDirt;
+}
+
+std::string Simulation::stepToString(Step step) const {
+    switch (step) {
+        case Step::North: return "N";
+        case Step::East: return "E";
+        case Step::South: return "S";
+        case Step::West: return "W";
+        case Step::Stay: return "s";
+        case Step::Finish: return "F";
+        default: return "";
+    }
+}
+
+void Simulation::writeOutputFile(const std::string& outputFilePath) {
+    std::ofstream outputFile(outputFilePath);
+    if (!outputFile.is_open()) {
+        std::cerr << "Failed to open output file: " << outputFilePath << std::endl;
+        return;
+    }
+
+    int dirtLeft = calculateDirtLeft();
+    std::string status = (steps < house.getMaxSteps() && batteryMeter->getBatteryState() > 0) ? "FINISHED" : "WORKING";
+
+    outputFile << "NumSteps = " << steps << "\n";
+    outputFile << "DirtLeft = " << dirtLeft << "\n";
+    outputFile << "Status = " << status << "\n";
+    outputFile << "Steps:\n";
+
+    for (const Step& step : stepHistory) {
+        outputFile << stepToString(step);
+    }
+    outputFile.close();
 }

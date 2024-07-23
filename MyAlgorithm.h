@@ -4,10 +4,9 @@
 #include "abstract_algorithm.h"
 #include "ConcreteSensors.h"
 #include "enums.h"
+#include <map>
 #include <stack>
-#include <vector>
-
-enum Color { WHITE, GREY, BLACK };
+#include <utility>
 
 class MyAlgorithm : public AbstractAlgorithm {
 public:
@@ -24,15 +23,17 @@ private:
     const DirtSensor* dirtSensor;
     const BatteryMeter* batteryMeter;
     std::stack<std::pair<int, int>> historyStack;
-    std::vector<std::vector<Color>> colorMatrix;
+    std::map<std::pair<int, int>, int> visited; // Stores visited cells and their dirt level
+    std::map<std::pair<int, int>, std::vector<Direction>> unexplored; // Stores unexplored cells and their directions
 
     int currentRow, currentCol;
     bool isInitialized;
 
-    void initializeColorMatrix(int rows, int cols);
+    void initialize();
     Step moveToNextCell();
+    Step backtrack();
     bool isValidMove(int row, int col);
-    bool allNeighborsBlack(int row, int col);
+    void updateUnexplored(int row, int col);
 };
 
 #endif // MY_ALGORITHM_H

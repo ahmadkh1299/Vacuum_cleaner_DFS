@@ -4,7 +4,9 @@
 #include <sstream>
 
 House::House(const std::string& filePath) : valid(true), dockingStationRow(-1), dockingStationCol(-1) {
-    parseHouseFile(filePath);
+    if (!filePath.empty()) {
+        parseHouseFile(filePath);
+    }
 }
 
 void House::parseHouseFile(const std::string& filePath) {

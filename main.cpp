@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 #include "Simulation.h"
 #include "MyAlgorithm.h"
 
@@ -9,12 +10,17 @@ int main(int argc, char** argv) {
     }
 
     std::string houseFilePath = argv[1];
+    std::string outputFilePath = std::filesystem::path(houseFilePath).stem().string() + "_output.txt";
+
     Simulation simulator;
     simulator.readHouseFile(houseFilePath);
 
     MyAlgorithm algo;
     simulator.setAlgorithm(algo);
     simulator.run();
+    simulator.writeOutputFile(outputFilePath);
+
+    std::cout << "Output written to: " << outputFilePath << std::endl;
 
     return 0;
 }
