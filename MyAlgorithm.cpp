@@ -2,7 +2,8 @@
 #include <iostream>
 
 MyAlgorithm::MyAlgorithm()
-        : maxSteps(0), wallsSensor(nullptr), dirtSensor(nullptr), batteryMeter(nullptr), currentRow(0), currentCol(0), isInitialized(false) {}
+        : maxSteps(0), wallsSensor(nullptr), dirtSensor(nullptr), batteryMeter(nullptr),
+          currentRow(0), currentCol(0), dockingRow(0), dockingCol(0), isInitialized(false) {}
 
 void MyAlgorithm::setMaxSteps(std::size_t maxSteps) {
     this->maxSteps = maxSteps;
@@ -21,9 +22,12 @@ void MyAlgorithm::setBatteryMeter(const BatteryMeter& meter) {
 }
 
 void MyAlgorithm::initialize() {
+    if (isInitialized) return;
     isInitialized = true;
-    currentRow = 0;
-    currentCol = 0;
+
+    // Assume that the initial position is the docking station
+    currentRow = dockingRow;
+    currentCol = dockingCol;
     historyStack.push({currentRow, currentCol});
     updateUnexplored(currentRow, currentCol);
 }
@@ -36,11 +40,12 @@ Step MyAlgorithm::nextStep() {
     // Clean the current cell if it has dirt
     int dirtLevel = dirtSensor->dirtLevel();
     if (dirtLevel > 0) {
+        // Record the cleaned dirt level
         visited[{currentRow, currentCol}] = dirtLevel - 1;
         return Step::Stay;
     }
 
-    // Move to the next unexplored cell or backtrack if necessary
+    // Continue exploring or backtrack if all nearby areas are explored
     return moveToNextCell();
 }
 
@@ -89,11 +94,11 @@ Step MyAlgorithm::moveToNextCell() {
             break;
     }
 
-    // If the move is not valid, try the next direction
     return moveToNextCell();
 }
 
 Step MyAlgorithm::backtrack() {
+    // If all cells have been visited, the task is complete
     if (historyStack.empty()) {
         return Step::Finish;
     }

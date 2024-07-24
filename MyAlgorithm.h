@@ -23,10 +23,11 @@ private:
     const DirtSensor* dirtSensor;
     const BatteryMeter* batteryMeter;
     std::stack<std::pair<int, int>> historyStack;
-    std::map<std::pair<int, int>, int> visited; // Stores visited cells and their dirt level
-    std::map<std::pair<int, int>, std::vector<Direction>> unexplored; // Stores unexplored cells and their directions
+    std::map<std::pair<int, int>, int> visited;
+    std::map<std::pair<int, int>, std::vector<Direction>> unexplored;
 
     int currentRow, currentCol;
+    int dockingRow, dockingCol;
     bool isInitialized;
 
     void initialize();

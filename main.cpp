@@ -1,7 +1,6 @@
-#include <iostream>
-#include <filesystem>
 #include "Simulation.h"
 #include "MyAlgorithm.h"
+#include <iostream>
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -10,17 +9,19 @@ int main(int argc, char** argv) {
     }
 
     std::string houseFilePath = argv[1];
-    std::string outputFilePath = std::filesystem::path(houseFilePath).stem().string() + "_output.txt";
-
-    Simulation simulator;
-    simulator.readHouseFile(houseFilePath);
-
     MyAlgorithm algo;
+    Simulation simulator;
+
+    if (!simulator.readHouseFile(houseFilePath)) {
+        return EXIT_FAILURE;
+    }
+
     simulator.setAlgorithm(algo);
     simulator.run();
+    size_t lastDot = houseFilePath.find_last_of('.');
+    std::string baseName = (lastDot == std::string::npos) ? houseFilePath : houseFilePath.substr(0, lastDot);
+    std::string outputFilePath = baseName + "_output.txt";
     simulator.writeOutputFile(outputFilePath);
-
-    std::cout << "Output written to: " << outputFilePath << std::endl;
 
     return 0;
 }

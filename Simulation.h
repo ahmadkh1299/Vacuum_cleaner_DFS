@@ -11,7 +11,7 @@
 class Simulation {
 public:
     Simulation();
-    void readHouseFile(const std::string& houseFilePath);
+    bool readHouseFile(const std::string& houseFilePath);
     void setAlgorithm(AbstractAlgorithm& algo);
     void run();
     void writeOutputFile(const std::string& outputFilePath);
@@ -26,7 +26,9 @@ private:
     int steps;
     std::vector<Step> stepHistory;
 
-    void moveRobot(Direction d);
+    void moveRobot(Step d);
+    bool isHouseClean() const;
+    bool atDockingStation() const;
     int calculateDirtLeft() const;
     std::string stepToString(Step step) const;
 };

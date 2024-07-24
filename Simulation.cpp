@@ -5,11 +5,11 @@
 Simulation::Simulation()
         : house(""), currentRow(0), currentCol(0), algorithm(nullptr), steps(0) {}
 
-void Simulation::readHouseFile(const std::string& houseFilePath) {
+bool Simulation::readHouseFile(const std::string& houseFilePath) {
     house = House(houseFilePath);
     if (!house.isValid()) {
         std::cerr << "Invalid house file." << std::endl;
-        exit(EXIT_FAILURE);
+        return false;
     }
 
     currentRow = house.getDockingStationRow();
@@ -18,6 +18,8 @@ void Simulation::readHouseFile(const std::string& houseFilePath) {
     wallsSensor = std::make_unique<ConcreteWallsSensor>(house, currentRow, currentCol);
     dirtSensor = std::make_unique<ConcreteDirtSensor>(house, currentRow, currentCol);
     batteryMeter = std::make_unique<ConcreteBatteryMeter>(house.getMaxBattery());
+
+    return true;
 }
 
 void Simulation::setAlgorithm(AbstractAlgorithm& algo) {
@@ -28,39 +30,43 @@ void Simulation::setAlgorithm(AbstractAlgorithm& algo) {
     algorithm->setBatteryMeter(*batteryMeter);
 }
 
+bool Simulation::isHouseClean() const {
+    return house.isHouseClean();
+}
+
+bool Simulation::atDockingStation() const {
+    return currentRow == house.getDockingStationRow() && currentCol == house.getDockingStationCol();
+}
+
 void Simulation::run() {
+    printf("%d , %zu",house.getMaxSteps(), batteryMeter->getBatteryState());
     while (steps < house.getMaxSteps() && batteryMeter->getBatteryState() > 0) {
-        Step step = algorithm->nextStep();
-        stepHistory.push_back(step);
-        if (step == Step::Finish) {
+        if (isHouseClean() && atDockingStation()) {
+            stepHistory.push_back(Step::Finish);
+            std::cout << "Algorithm finished: house is clean and robot is at the docking station." << std::endl;
             break;
         }
 
-        switch (step) {
-            case Step::North:
-                moveRobot(Direction::North);
-                break;
-            case Step::East:
-                moveRobot(Direction::East);
-                break;
-            case Step::South:
-                moveRobot(Direction::South);
-                break;
-            case Step::West:
-                moveRobot(Direction::West);
-                break;
-            case Step::Stay:
-                // Do nothing
-                break;
-            case Step::Finish:
-                // This case is handled by the if statement above
-                break;
-        }
+        Step step = algorithm->nextStep();
+        stepHistory.push_back(step);
 
-        if (dirtSensor->dirtLevel() > 0) {
-            house.cleanCell(currentRow, currentCol);
-        }
+        // Print each step
+        std::cout << "Step " << steps + 1 << ": " << stepToString(step) << std::endl;
 
+        if (step == Step::Finish) {
+            std::cout << "Algorithm requested finish." << std::endl;
+            break;
+        }
+        else if (step == Step::Stay) {
+            if (dirtSensor->dirtLevel() > 0) {
+                house.cleanCell(currentRow, currentCol);
+            } else if (atDockingStation()) {
+                batteryMeter->chargeBattery(1);
+            }
+            break;
+        } else {
+            moveRobot(step);
+        }
         batteryMeter->useBattery();
         steps++;
     }
@@ -68,21 +74,28 @@ void Simulation::run() {
     std::cout << "Simulation completed in " << steps << " steps." << std::endl;
 }
 
-void Simulation::moveRobot(Direction d) {
+void Simulation::moveRobot(Step d) {
     switch (d) {
-        case Direction::North:
-            if (currentRow > 0 && !wallsSensor->isWall(Direction::North)) currentRow--;
+        case Step::North:
+            if (currentRow > 0) currentRow--;
             break;
-        case Direction::East:
-            if (currentCol < house.getCols() - 1 && !wallsSensor->isWall(Direction::East)) currentCol++;
+        case Step::East:
+            if (currentCol < house.getCols() - 1) currentCol++;
             break;
-        case Direction::South:
-            if (currentRow < house.getRows() - 1 && !wallsSensor->isWall(Direction::South)) currentRow++;
+        case Step::South:
+            if (currentRow < house.getRows() - 1) currentRow++;
             break;
-        case Direction::West:
-            if (currentCol > 0 && !wallsSensor->isWall(Direction::West)) currentCol--;
+        case Step::West:
+            if (currentCol > 0) currentCol--;
+            break;
+        case Step::Stay:
+            break;
+        case Step::Finish:
             break;
     }
+    // Update the position of the sensors after the move
+    wallsSensor->updatePosition(currentRow, currentCol);
+    dirtSensor->updatePosition(currentRow, currentCol);
 }
 
 int Simulation::calculateDirtLeft() const {
