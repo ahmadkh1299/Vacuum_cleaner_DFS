@@ -4,6 +4,7 @@
 #include "House.h"
 #include "ConcreteSensors.h"
 #include "abstract_algorithm.h"
+#include "Vacuum.h"
 #include <memory>
 #include <vector>
 #include <string>

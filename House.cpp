@@ -134,6 +134,7 @@ void House::cleanCell(int row, int col) {
         curr_dirt--;
     }
 }
-bool House::isHouseClean() const{
-    return curr_dirt<1;
+
+bool House::isHouseClean() const {
+    return curr_dirt < 1;
 }

@@ -30,48 +30,36 @@ void Simulation::setAlgorithm(AbstractAlgorithm& algo) {
     algorithm->setBatteryMeter(*batteryMeter);
 }
 
-bool Simulation::isHouseClean() const {
-    return house.isHouseClean();
-}
-
-bool Simulation::atDockingStation() const {
-    return currentRow == house.getDockingStationRow() && currentCol == house.getDockingStationCol();
-}
-
 void Simulation::run() {
-    printf("%d , %zu",house.getMaxSteps(), batteryMeter->getBatteryState());
-    while (steps < house.getMaxSteps() && batteryMeter->getBatteryState() > 0) {
-        if (isHouseClean() && atDockingStation()) {
-            stepHistory.push_back(Step::Finish);
-            std::cout << "Algorithm finished: house is clean and robot is at the docking station." << std::endl;
-            break;
-        }
-
-        Step step = algorithm->nextStep();
-        stepHistory.push_back(step);
-
-        // Print each step
-        std::cout << "Step " << steps + 1 << ": " << stepToString(step) << std::endl;
-
-        if (step == Step::Finish) {
-            std::cout << "Algorithm requested finish." << std::endl;
-            break;
-        }
-        else if (step == Step::Stay) {
-            if (dirtSensor->dirtLevel() > 0) {
-                house.cleanCell(currentRow, currentCol);
-            } else if (atDockingStation()) {
-                batteryMeter->chargeBattery(1);
-            }
-            break;
-        } else {
-            moveRobot(step);
-        }
-        batteryMeter->useBattery();
-        steps++;
+    if (!wallsSensor || !dirtSensor || !batteryMeter || !algorithm) {
+        std::cerr << "Simulation components not initialized properly." << std::endl;
+        return;
     }
 
-    std::cout << "Simulation completed in " << steps << " steps." << std::endl;
+    Vacuum vacuum(*algorithm, *wallsSensor, *dirtSensor, *batteryMeter, house.getMaxSteps(), house);
+    vacuum.start();
+    vacuum.outputResults("simulation_output.txt");
+}
+
+void Simulation::writeOutputFile(const std::string& outputFilePath) {
+    std::ofstream outputFile(outputFilePath);
+    if (!outputFile.is_open()) {
+        std::cerr << "Failed to open output file: " << outputFilePath << std::endl;
+        return;
+    }
+
+    int dirtLeft = calculateDirtLeft();
+    std::string status = (steps < house.getMaxSteps() && batteryMeter->getBatteryState() > 0) ? "FINISHED" : "WORKING";
+
+    outputFile << "NumSteps = " << steps << "\n";
+    outputFile << "DirtLeft = " << dirtLeft << "\n";
+    outputFile << "Status = " << status << "\n";
+    outputFile << "Steps:\n";
+
+    for (const Step& step : stepHistory) {
+        outputFile << stepToString(step);
+    }
+    outputFile.close();
 }
 
 void Simulation::moveRobot(Step d) {
@@ -93,9 +81,16 @@ void Simulation::moveRobot(Step d) {
         case Step::Finish:
             break;
     }
-    // Update the position of the sensors after the move
     wallsSensor->updatePosition(currentRow, currentCol);
     dirtSensor->updatePosition(currentRow, currentCol);
+}
+
+bool Simulation::isHouseClean() const {
+    return house.isHouseClean();
+}
+
+bool Simulation::atDockingStation() const {
+    return currentRow == house.getDockingStationRow() && currentCol == house.getDockingStationCol();
 }
 
 int Simulation::calculateDirtLeft() const {
@@ -121,25 +116,4 @@ std::string Simulation::stepToString(Step step) const {
         case Step::Finish: return "F";
         default: return "";
     }
-}
-
-void Simulation::writeOutputFile(const std::string& outputFilePath) {
-    std::ofstream outputFile(outputFilePath);
-    if (!outputFile.is_open()) {
-        std::cerr << "Failed to open output file: " << outputFilePath << std::endl;
-        return;
-    }
-
-    int dirtLeft = calculateDirtLeft();
-    std::string status = (steps < house.getMaxSteps() && batteryMeter->getBatteryState() > 0) ? "FINISHED" : "WORKING";
-
-    outputFile << "NumSteps = " << steps << "\n";
-    outputFile << "DirtLeft = " << dirtLeft << "\n";
-    outputFile << "Status = " << status << "\n";
-    outputFile << "Steps:\n";
-
-    for (const Step& step : stepHistory) {
-        outputFile << stepToString(step);
-    }
-    outputFile.close();
 }
