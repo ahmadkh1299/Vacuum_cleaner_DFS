@@ -6,6 +6,7 @@
 #include "enums.h"
 #include <map>
 #include <stack>
+#include <vector>
 #include <utility>
 
 class MyAlgorithm : public AbstractAlgorithm {
@@ -16,6 +17,10 @@ public:
     void setDirtSensor(const DirtSensor& sensor) override;
     void setBatteryMeter(const BatteryMeter& meter) override;
     Step nextStep() override;
+    bool isHouseClean();
+    bool atDockingStation();
+
+
 
 private:
     std::size_t maxSteps;
@@ -25,6 +30,7 @@ private:
     std::stack<std::pair<int, int>> historyStack;
     std::map<std::pair<int, int>, int> visited;
     std::map<std::pair<int, int>, std::vector<Direction>> unexplored;
+    std::vector<Step> pathToDock;
 
     int currentRow, currentCol;
     int dockingRow, dockingCol;
@@ -35,6 +41,10 @@ private:
     Step backtrack();
     bool isValidMove(int row, int col);
     void updateUnexplored(int row, int col);
+    bool needToReturnToDock();
+    Step returnToDock();
+    bool isHouseClean() const;
+    bool atDockingStation() const;
 };
 
 #endif // MY_ALGORITHM_H

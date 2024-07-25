@@ -27,7 +27,7 @@ private:
     int steps;
     std::vector<Step> stepHistory;
 
-    void moveRobot(Step d);
+    bool moveRobot(Step d);
     bool isHouseClean() const;
     bool atDockingStation() const;
     int calculateDirtLeft() const;

@@ -1,6 +1,7 @@
 #include "Simulation.h"
 #include <iostream>
 #include <fstream>
+#include "Vacuum.h"
 
 Simulation::Simulation()
         : house(""), currentRow(0), currentCol(0), algorithm(nullptr), steps(0) {}
@@ -36,9 +37,46 @@ void Simulation::run() {
         return;
     }
 
-    Vacuum vacuum(*algorithm, *wallsSensor, *dirtSensor, *batteryMeter, house.getMaxSteps(), house);
-    vacuum.start();
-    vacuum.outputResults("simulation_output.txt");
+    steps = 0;
+    while (steps < house.getMaxSteps() && batteryMeter->getBatteryState() > 0) {
+        Step nextStep = algorithm->nextStep();
+        stepHistory.push_back(nextStep);
+
+        std::cout << "Step " << steps << ": " << stepToString(nextStep) 
+                  << " at position (" << currentRow << "," << currentCol << ")" << std::endl;
+
+        if (nextStep == Step::Finish) {
+            std::cout << "Algorithm finished cleaning." << std::endl;
+            break;
+        }
+
+        if (nextStep != Step::Stay) {
+            if (!moveRobot(nextStep)) {
+                std::cout << "Cannot move in direction: " << static_cast<int>(nextStep) << std::endl;
+                continue;
+            }
+        }
+
+        // Clean the current cell if it has dirt
+        int dirtLevel = dirtSensor->dirtLevel();
+        if (dirtLevel > 0) {
+            house.cleanCell(currentRow, currentCol);
+            std::cout << "Cleaned dirt at (" << currentRow << "," << currentCol << ")" << std::endl;
+        }
+
+        // Use battery
+        batteryMeter->useBattery();
+
+        // Charge if at docking station
+        if (atDockingStation()) {
+            batteryMeter->chargeBattery(1);  // Charge for 1 step
+            std::cout << "Charging at docking station" << std::endl;
+        }
+
+        steps++;
+    }
+
+    writeOutputFile("simulation_output.txt");
 }
 
 void Simulation::writeOutputFile(const std::string& outputFilePath) {
@@ -62,27 +100,33 @@ void Simulation::writeOutputFile(const std::string& outputFilePath) {
     outputFile.close();
 }
 
-void Simulation::moveRobot(Step d) {
-    switch (d) {
-        case Step::North:
-            if (currentRow > 0) currentRow--;
-            break;
-        case Step::East:
-            if (currentCol < house.getCols() - 1) currentCol++;
-            break;
-        case Step::South:
-            if (currentRow < house.getRows() - 1) currentRow++;
-            break;
-        case Step::West:
-            if (currentCol > 0) currentCol--;
-            break;
+bool Simulation::moveRobot(Step step) {
+    int newRow = currentRow;
+    int newCol = currentCol;
+
+    switch (step) {
+        case Step::North: newRow--; break;
+        case Step::East:  newCol++; break;
+        case Step::South: newRow++; break;
+        case Step::West:  newCol--; break;
         case Step::Stay:
-            break;
         case Step::Finish:
-            break;
+            return true;  // These are valid steps that don't involve movement
+        default:
+            std::cerr << "Invalid step encountered: " << static_cast<int>(step) << std::endl;
+            return false;
     }
+
+    if (newRow < 0 || newRow >= house.getRows() || newCol < 0 || newCol >= house.getCols() || 
+        house.getCell(newRow, newCol) == 'W') {
+        return false;  // Invalid move
+    }
+
+    currentRow = newRow;
+    currentCol = newCol;
     wallsSensor->updatePosition(currentRow, currentCol);
     dirtSensor->updatePosition(currentRow, currentCol);
+    return true;
 }
 
 bool Simulation::isHouseClean() const {

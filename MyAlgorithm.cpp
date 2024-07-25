@@ -1,5 +1,6 @@
 #include "MyAlgorithm.h"
 #include <iostream>
+#include <cmath>
 
 MyAlgorithm::MyAlgorithm()
         : maxSteps(0), wallsSensor(nullptr), dirtSensor(nullptr), batteryMeter(nullptr),
@@ -30,6 +31,7 @@ void MyAlgorithm::initialize() {
     currentCol = dockingCol;
     historyStack.push({currentRow, currentCol});
     updateUnexplored(currentRow, currentCol);
+    pathToDock.clear();
 }
 
 Step MyAlgorithm::nextStep() {
@@ -37,12 +39,21 @@ Step MyAlgorithm::nextStep() {
         initialize();
     }
 
+    // Check if we need to return to the docking station
+    if (needToReturnToDock()) {
+        return returnToDock();
+    }
+
     // Clean the current cell if it has dirt
     int dirtLevel = dirtSensor->dirtLevel();
     if (dirtLevel > 0) {
-        // Record the cleaned dirt level
         visited[{currentRow, currentCol}] = dirtLevel - 1;
         return Step::Stay;
+    }
+
+    // If the house is clean and we're at the docking station, finish
+    if (isHouseClean() && pathToDock.empty()) {
+        return Step::Finish;
     }
 
     // Continue exploring or backtrack if all nearby areas are explored
@@ -59,42 +70,41 @@ Step MyAlgorithm::moveToNextCell() {
     Direction dir = unexplored[{currentRow, currentCol}].back();
     unexplored[{currentRow, currentCol}].pop_back();
 
+    Step step = Step::Stay;
     switch (dir) {
         case Direction::North:
             if (isValidMove(currentRow - 1, currentCol)) {
                 currentRow--;
-                historyStack.push({currentRow, currentCol});
-                updateUnexplored(currentRow, currentCol);
-                return Step::North;
+                step = Step::North;
             }
             break;
         case Direction::East:
             if (isValidMove(currentRow, currentCol + 1)) {
                 currentCol++;
-                historyStack.push({currentRow, currentCol});
-                updateUnexplored(currentRow, currentCol);
-                return Step::East;
+                step = Step::East;
             }
             break;
         case Direction::South:
             if (isValidMove(currentRow + 1, currentCol)) {
                 currentRow++;
-                historyStack.push({currentRow, currentCol});
-                updateUnexplored(currentRow, currentCol);
-                return Step::South;
+                step = Step::South;
             }
             break;
         case Direction::West:
             if (isValidMove(currentRow, currentCol - 1)) {
                 currentCol--;
-                historyStack.push({currentRow, currentCol});
-                updateUnexplored(currentRow, currentCol);
-                return Step::West;
+                step = Step::West;
             }
             break;
     }
 
-    return moveToNextCell();
+    if (step != Step::Stay) {
+        historyStack.push({currentRow, currentCol});
+        updateUnexplored(currentRow, currentCol);
+        pathToDock.push_back(step);
+    }
+
+    return step != Step::Stay ? step : moveToNextCell();
 }
 
 Step MyAlgorithm::backtrack() {
@@ -109,21 +119,26 @@ Step MyAlgorithm::backtrack() {
     int prevRow = prev.first;
     int prevCol = prev.second;
 
+    Step step = Step::Stay;
     if (currentRow == prevRow && currentCol == prevCol + 1) {
         currentCol--;
-        return Step::West;
+        step = Step::West;
     } else if (currentRow == prevRow && currentCol == prevCol - 1) {
         currentCol++;
-        return Step::East;
+        step = Step::East;
     } else if (currentRow == prevRow + 1 && currentCol == prevCol) {
         currentRow--;
-        return Step::North;
+        step = Step::North;
     } else if (currentRow == prevRow - 1 && currentCol == prevCol) {
         currentRow++;
-        return Step::South;
+        step = Step::South;
     }
 
-    return Step::Stay;
+    if (step != Step::Stay) {
+        pathToDock.pop_back();
+    }
+
+    return step;
 }
 
 bool MyAlgorithm::isValidMove(int row, int col) {
@@ -135,6 +150,7 @@ bool MyAlgorithm::isValidMove(int row, int col) {
 }
 
 void MyAlgorithm::updateUnexplored(int row, int col) {
+    unexplored[{row, col}].clear(); // Re-evaluate all directions
     std::vector<Direction> directions = {Direction::North, Direction::East, Direction::South, Direction::West};
     for (Direction dir : directions) {
         int newRow = row, newCol = col;
@@ -148,4 +164,61 @@ void MyAlgorithm::updateUnexplored(int row, int col) {
             unexplored[{row, col}].push_back(dir);
         }
     }
+}
+
+bool MyAlgorithm::needToReturnToDock() {
+    int batteryLeft = batteryMeter->getBatteryState();
+    int stepsToDoc = pathToDock.size();
+    return batteryLeft <= stepsToDoc + 5; // +5 for safety margin
+}
+
+
+
+bool MyAlgorithm::isHouseClean() const {
+    for (const auto& pair : visited) {
+        if (pair.second > 0) return false;
+    }
+    return true;
+}
+
+bool MyAlgorithm::atDockingStation() const {
+    return currentRow == dockingRow && currentCol == dockingCol;
+}
+
+
+Step MyAlgorithm::returnToDock() {
+    if (pathToDock.empty()) {
+        return Step::Stay; // We're at the docking station
+    }
+
+    Step reverseStep = pathToDock.back();
+    pathToDock.pop_back();
+
+    switch (reverseStep) {
+        case Step::North: 
+            currentRow++;
+            return Step::South;
+        case Step::South:
+            currentRow--;
+            return Step::North;
+        case Step::East:
+            currentCol--;
+            return Step::West;
+        case Step::West:
+            currentCol++;
+            return Step::East;
+        default:
+            return Step::Stay;
+    }
+}
+
+bool MyAlgorithm::isHouseClean() {
+    for (const auto& pair : visited) {
+        if (pair.second > 0) return false;
+    }
+    return true;
+}
+
+bool MyAlgorithm::atDockingStation() {
+    return currentRow == dockingRow && currentCol == dockingCol;
 }
