@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <regex>
 #include <algorithm>
+#include <iostream>
 
 class ConfigReader {
 public:
@@ -33,6 +34,13 @@ public:
 
     int getCols() const {
         return cols;
+    }
+
+    void printLayout() const {
+        std::cout << "Layout:\n";
+        for (const auto& row : layout) {
+            std::cout << row << std::endl;
+        }
     }
 
 private:

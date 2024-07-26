@@ -8,7 +8,7 @@ Vacuum::Vacuum(AbstractAlgorithm& algorithm, ConcreteWallsSensor& wallsSensor, C
 
 void Vacuum::start() {
     while (total_steps < max_mission_steps && batteryMeter.getBatteryState() > 0) {
-        if (dirtSensor.dirtLevel() > 0) {
+        if (dirtSensor.dirtLevel() > 0 && dirtSensor.dirtLevel()<=9) {
             dirtSensor.updatePosition(getX(), getY());
         }
         Step nextStep = algorithm.nextStep();

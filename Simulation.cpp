@@ -3,7 +3,7 @@
 #include <fstream>
 
 Simulation::Simulation()
-        : house({}), maxSteps(0), maxBattery(0), currentRow(0), currentCol(0), algorithm(nullptr), steps(0) {}
+        : house(), maxSteps(0), maxBattery(0), currentRow(0), currentCol(0), algorithm(nullptr), steps(0) {}
 
 bool Simulation::readHouseFile(const std::string& houseFilePath) {
     try {
@@ -31,6 +31,12 @@ void Simulation::setAlgorithm(AbstractAlgorithm& algo) {
     algorithm->setWallsSensor(*wallsSensor);
     algorithm->setDirtSensor(*dirtSensor);
     algorithm->setBatteryMeter(*batteryMeter);
+
+    // Set docking station if the algorithm supports it
+    MyAlgorithm* myAlgo = dynamic_cast<MyAlgorithm*>(algorithm);
+    if (myAlgo) {
+        myAlgo->setDockingStation(currentRow, currentCol);
+    }
 }
 
 void Simulation::run() {

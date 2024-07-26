@@ -3,10 +3,10 @@
 
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 class House {
 public:
+    House();
     House(const std::vector<std::string>& layout_v);
 
     int getRows() const;
@@ -16,7 +16,8 @@ public:
     int getCell(int row, int col) const;
     void cleanCell(int row, int col);
     bool isHouseClean() const;
-    void printLayout() const;
+
+    void printMatrix() const;
 
 private:
     int rows;
@@ -25,6 +26,7 @@ private:
     int dockingStationCol;
     int total_dirt;
     std::vector<std::vector<int>> house_matrix;
+    bool valid;
 
     void addWallsPadding(std::vector<std::string>& layout_v);
     void initializeMatrix(const std::vector<std::string>& layout_v);

@@ -17,6 +17,8 @@ public:
     void setBatteryMeter(const BatteryMeter& meter) override;
     Step nextStep() override;
 
+    void setDockingStation(int Row, int Col); // Specific to MyAlgorithm
+
 private:
     std::size_t maxSteps;
     const WallsSensor* wallsSensor;
@@ -30,7 +32,7 @@ private:
     int dockingRow, dockingCol;
     bool isInitialized;
 
-    void initialize();
+    void initialize(int dockrow, int dockcol);
     Step moveToNextCell();
     Step backtrack();
     bool isValidMove(int row, int col);

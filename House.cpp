@@ -2,6 +2,11 @@
 #include <iostream>
 #include <algorithm>
 
+House::House()
+        : rows(0), cols(0), dockingStationRow(-1), dockingStationCol(-1), total_dirt(0) {
+    // house_matrix is implicitly initialized to an empty vector
+}
+
 House::House(const std::vector<std::string>& layout_v)
         : dockingStationRow(-1), dockingStationCol(-1), total_dirt(0) {
     std::vector<std::string> layout_copy = layout_v;
@@ -9,6 +14,23 @@ House::House(const std::vector<std::string>& layout_v)
     initializeMatrix(layout_copy);
     findDockingStation();
     updateDirtCount();
+    printMatrix();
+}
+
+void House::printMatrix() const {
+    std::cout << "House matrix:\n";
+    for (const auto& row : house_matrix) {
+        for (int cell : row) {
+            if (cell == -1) {
+                std::cout << "W ";
+            } else if (cell == 20) {
+                std::cout << "D ";
+            } else {
+                std::cout << cell << ' ';
+            }
+        }
+        std::cout << '\n';
+    }
 }
 
 void House::initializeMatrix(const std::vector<std::string>& layout_v) {
@@ -44,21 +66,23 @@ void House::findDockingStation() {
 void House::addWallsPadding(std::vector<std::string>& layout_v) {
     int max_length = 0;
 
+    // Determine the maximum length of the rows
     for (const auto& row : layout_v) {
         if (row.size() > max_length) {
             max_length = row.size();
         }
     }
 
+    // Pad each row to the maximum length with spaces
     for (auto& row : layout_v) {
         while (row.size() < max_length) {
-            row.push_back('W');
+            row.push_back(' ');
         }
     }
 
     bool needs_walls = false;
 
-    // Check top and bottom rows
+    // Check top and bottom rows for missing walls
     for (char c : layout_v[0]) {
         if (c != 'W') {
             needs_walls = true;
@@ -72,7 +96,7 @@ void House::addWallsPadding(std::vector<std::string>& layout_v) {
         }
     }
 
-    // Check left and right columns
+    // Check left and right columns for missing walls
     if (!needs_walls) {
         for (const auto& row : layout_v) {
             if (row[0] != 'W' || row[max_length - 1] != 'W') {
@@ -82,6 +106,7 @@ void House::addWallsPadding(std::vector<std::string>& layout_v) {
         }
     }
 
+    // Add walls padding if needed
     if (needs_walls) {
         for (auto& row : layout_v) {
             row.insert(row.begin(), 'W');
@@ -90,22 +115,6 @@ void House::addWallsPadding(std::vector<std::string>& layout_v) {
         std::string wall_row(max_length + 2, 'W');
         layout_v.insert(layout_v.begin(), wall_row);
         layout_v.push_back(wall_row);
-    }
-}
-
-void House::printLayout() const {
-    std::cout << "House Layout:" << std::endl;
-    for (const auto& row : house_matrix) {
-        for (const auto& cell : row) {
-            if (cell == -1) {
-                std::cout << 'W';
-            } else if (cell == 20) {
-                std::cout << 'D';
-            } else {
-                std::cout << cell;
-            }
-        }
-        std::cout << std::endl;
     }
 }
 
