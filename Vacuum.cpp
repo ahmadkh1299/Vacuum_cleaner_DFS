@@ -9,15 +9,13 @@ Vacuum::Vacuum(AbstractAlgorithm& algorithm, ConcreteWallsSensor& wallsSensor, C
 void Vacuum::start() {
     current_location = std::make_pair(house.getDockingStationRow(), house.getDockingStationCol());
     while (total_steps < max_mission_steps && batteryMeter.getBatteryState() > 0) {
-        if (dirtSensor.dirtLevel() > 0 && dirtSensor.dirtLevel()<=9) {
-            dirtSensor.updatePosition(getX(), getY());
-        }
         Step nextStep = algorithm.nextStep();
         logStep(nextStep);
         if (!move(nextStep)) {
             std::cout << "Cannot move in direction: " << static_cast<int>(nextStep) << std::endl;
             break;
         }
+        printf("%d ,%d\n",current_location.first, current_location.second);
         total_steps++;
         wallsSensor.updatePosition(current_location.first, current_location.second);
         dirtSensor.updatePosition(current_location.first, current_location.second);
@@ -39,7 +37,8 @@ void Vacuum::outputResults(const std::string& output_file) const {
 
 bool Vacuum::move(Step step) {
     Direction direction = static_cast<Direction>(step);
-    if (isWall(direction)) {
+
+    if (step!=Step::Stay && isWall(direction)) {
         return false;
     }
     switch (step) {

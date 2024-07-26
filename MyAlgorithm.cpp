@@ -1,5 +1,6 @@
 #include "MyAlgorithm.h"
 #include <iostream>
+#include <map>
 
 MyAlgorithm::MyAlgorithm()
         : maxSteps(0), wallsSensor(nullptr), dirtSensor(nullptr), batteryMeter(nullptr),
@@ -39,15 +40,21 @@ void MyAlgorithm::initialize(int dockrow, int dockcol) {
 
 Step MyAlgorithm::nextStep() {
     if (!isInitialized) {
-        initialize(dockingRow, dockingCol); // Initialize using docking coordinates
+        initialize(dockingRow, dockingCol);
+    }
+
+    int remainingBattery = batteryMeter->getBatteryState();
+    if (remainingBattery <= historyStack.size()) {
+        return backtrackToDocking();
     }
 
     int dirtLevel = dirtSensor->dirtLevel();
-    if (dirtLevel > 0 && dirtLevel<=9) {
+    if (dirtLevel > 0 && dirtLevel <= 9) {
         visited[{currentRow, currentCol}] = dirtLevel - 1;
         return Step::Stay;
     }
-    if(visited.find({currentRow, currentCol}) == visited.end()){
+
+    if (visited.find({currentRow, currentCol}) == visited.end()) {
         updateUnexplored(currentRow, currentCol);
     }
 
@@ -58,6 +65,7 @@ Step MyAlgorithm::moveToNextCell() {
     if (unexplored[{currentRow, currentCol}].empty()) {
         return backtrack();
     }
+
     Direction dir = unexplored[{currentRow, currentCol}].back();
     unexplored[{currentRow, currentCol}].pop_back();
 
@@ -66,6 +74,7 @@ Step MyAlgorithm::moveToNextCell() {
             if (isValidMove(currentRow - 1, currentCol)) {
                 currentRow--;
                 historyStack.push({currentRow, currentCol});
+                std::cout << "Moving North to (" << currentRow << ", " << currentCol << ")\n";
                 return Step::North;
             }
             break;
@@ -73,6 +82,7 @@ Step MyAlgorithm::moveToNextCell() {
             if (isValidMove(currentRow, currentCol + 1)) {
                 currentCol++;
                 historyStack.push({currentRow, currentCol});
+                std::cout << "Moving East to (" << currentRow << ", " << currentCol << ")\n";
                 return Step::East;
             }
             break;
@@ -80,6 +90,7 @@ Step MyAlgorithm::moveToNextCell() {
             if (isValidMove(currentRow + 1, currentCol)) {
                 currentRow++;
                 historyStack.push({currentRow, currentCol});
+                std::cout << "Moving South to (" << currentRow << ", " << currentCol << ")\n";
                 return Step::South;
             }
             break;
@@ -87,11 +98,11 @@ Step MyAlgorithm::moveToNextCell() {
             if (isValidMove(currentRow, currentCol - 1)) {
                 currentCol--;
                 historyStack.push({currentRow, currentCol});
+                std::cout << "Moving West to (" << currentRow << ", " << currentCol << ")\n";
                 return Step::West;
             }
             break;
     }
-
     return moveToNextCell();
 }
 
@@ -108,15 +119,51 @@ Step MyAlgorithm::backtrack() {
 
     if (currentRow == prevRow && currentCol == prevCol + 1) {
         currentCol--;
+        std::cout << "Backtracking West to (" << currentRow << ", " << currentCol << ")\n";
         return Step::West;
     } else if (currentRow == prevRow && currentCol == prevCol - 1) {
         currentCol++;
+        std::cout << "Backtracking East to (" << currentRow << ", " << currentCol << ")\n";
         return Step::East;
     } else if (currentRow == prevRow + 1 && currentCol == prevCol) {
         currentRow--;
+        std::cout << "Backtracking North to (" << currentRow << ", " << currentCol << ")\n";
         return Step::North;
     } else if (currentRow == prevRow - 1 && currentCol == prevCol) {
         currentRow++;
+        std::cout << "Backtracking South to (" << currentRow << ", " << currentCol << ")\n";
+        return Step::South;
+    }
+
+    return Step::Stay;
+}
+
+Step MyAlgorithm::backtrackToDocking() {
+    if (historyStack.empty()) {
+        return Step::Finish;
+    }
+
+    std::pair<int, int> prev = historyStack.top();
+    historyStack.pop();
+
+    int prevRow = prev.first;
+    int prevCol = prev.second;
+
+    if (currentRow == prevRow && currentCol == prevCol + 1) {
+        currentCol--;
+        std::cout << "Backtracking to Docking West to (" << currentRow << ", " << currentCol << ")\n";
+        return Step::West;
+    } else if (currentRow == prevRow && currentCol == prevCol - 1) {
+        currentCol++;
+        std::cout << "Backtracking to Docking East to (" << currentRow << ", " << currentCol << ")\n";
+        return Step::East;
+    } else if (currentRow == prevRow + 1 && currentCol == prevCol) {
+        currentRow--;
+        std::cout << "Backtracking to Docking North to (" << currentRow << ", " << currentCol << ")\n";
+        return Step::North;
+    } else if (currentRow == prevRow - 1 && currentCol == prevCol) {
+        currentRow++;
+        std::cout << "Backtracking to Docking South to (" << currentRow << ", " << currentCol << ")\n";
         return Step::South;
     }
 

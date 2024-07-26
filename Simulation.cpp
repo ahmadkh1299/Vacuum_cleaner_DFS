@@ -179,7 +179,7 @@ void Simulation::run() {
 
     Vacuum vacuum(*algorithm, *wallsSensor, *dirtSensor, *batteryMeter, maxSteps, house);
     vacuum.start();
-    vacuum.outputResults("simulation_output.txt");
+    vacuum.outputResults("C:\\Users\\97250\\Desktop\\TAU\\5th\\Advanced Programing\\Vacuum_cleaner_DFS\\simulation_output.txt");
 }
 
 void Simulation::writeOutputFile(const std::string& outputFilePath) {

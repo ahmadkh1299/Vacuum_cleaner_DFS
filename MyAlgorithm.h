@@ -15,9 +15,8 @@ public:
     void setWallsSensor(const WallsSensor& sensor) override;
     void setDirtSensor(const DirtSensor& sensor) override;
     void setBatteryMeter(const BatteryMeter& meter) override;
+    void setDockingStation(int Row, int Col);
     Step nextStep() override;
-
-    void setDockingStation(int Row, int Col); // Specific to MyAlgorithm
 
 private:
     std::size_t maxSteps;
@@ -35,6 +34,7 @@ private:
     void initialize(int dockrow, int dockcol);
     Step moveToNextCell();
     Step backtrack();
+    Step backtrackToDocking(); // Declaration of the new method
     bool isValidMove(int row, int col);
     void updateUnexplored(int row, int col);
 };
