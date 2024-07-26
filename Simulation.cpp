@@ -1,4 +1,5 @@
 #include "Simulation.h"
+#include "ConfigReader.h"
 #include <iostream>
 #include <fstream>
 
@@ -11,6 +12,7 @@ bool Simulation::readHouseFile(const std::string& houseFilePath) {
         maxSteps = config.getMaxSteps();
         maxBattery = config.getMaxBattery();
         house = House(config.getLayout());
+
 
         currentRow = house.getDockingStationRow();
         currentCol = house.getDockingStationCol();
@@ -49,6 +51,7 @@ void Simulation::run() {
     vacuum.start();
     vacuum.outputResults("simulation_output.txt");
 }
+
 
 void Simulation::writeOutputFile(const std::string& outputFilePath) {
     std::ofstream outputFile(outputFilePath);
@@ -107,7 +110,7 @@ int Simulation::calculateDirtLeft() const {
     for (int i = 0; i < house.getRows(); ++i) {
         for (int j = 0; j < house.getCols(); ++j) {
             int cell = house.getCell(i, j);
-            if (cell > 0 && cell < 20) {
+            if (cell > 0) {
                 totalDirt += cell;
             }
         }

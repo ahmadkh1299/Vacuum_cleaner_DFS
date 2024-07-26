@@ -9,15 +9,17 @@ int main(int argc, char** argv) {
     }
 
     std::string houseFilePath = argv[1];
-    MyAlgorithm algo;
     Simulation simulator;
 
     if (!simulator.readHouseFile(houseFilePath)) {
         return EXIT_FAILURE;
     }
 
+
+    MyAlgorithm algo;
     simulator.setAlgorithm(algo);
     simulator.run();
+
     size_t lastDot = houseFilePath.find_last_of('.');
     std::string baseName = (lastDot == std::string::npos) ? houseFilePath : houseFilePath.substr(0, lastDot);
     std::string outputFilePath = baseName + "_output.txt";

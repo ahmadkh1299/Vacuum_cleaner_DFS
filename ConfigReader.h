@@ -83,20 +83,25 @@ private:
             house_layout.push_back(layout[i].substr(0, cols));
         }
 
-        // Fill in missing rows and columns if necessary
+        // Fill in missing rows and columns with '0'
         while (house_layout.size() < rows) {
-            house_layout.push_back(std::string(cols, 'W'));
+            house_layout.push_back(std::string(cols, '0'));
         }
         for (auto &row : house_layout) {
             if (row.size() < cols) {
-                row.append(cols - row.size(), 'W');
+                row.append(cols - row.size(), '0');
             }
         }
 
         layout = house_layout;
 
-        //validateDockingStation();
+        // Print the layout
+        std::cout << "House Layout:" << std::endl;
+        for (const auto& row : layout) {
+            std::cout << row << std::endl;
+        }
     }
+
 
     int parseValue(const std::string &key, const std::string &line) {
         std::regex re(key + "\\s*=\\s*(\\d+)");
