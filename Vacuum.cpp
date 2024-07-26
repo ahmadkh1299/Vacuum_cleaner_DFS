@@ -7,6 +7,7 @@ Vacuum::Vacuum(AbstractAlgorithm& algorithm, ConcreteWallsSensor& wallsSensor, C
           max_mission_steps(max_mission_steps), total_steps(0), current_location(0, 0), house(house) {}
 
 void Vacuum::start() {
+    current_location = std::make_pair(house.getDockingStationRow(), house.getDockingStationCol());
     while (total_steps < max_mission_steps && batteryMeter.getBatteryState() > 0) {
         if (dirtSensor.dirtLevel() > 0 && dirtSensor.dirtLevel()<=9) {
             dirtSensor.updatePosition(getX(), getY());
@@ -18,6 +19,8 @@ void Vacuum::start() {
             break;
         }
         total_steps++;
+        wallsSensor.updatePosition(current_location.first, current_location.second);
+        dirtSensor.updatePosition(current_location.first, current_location.second);
     }
 }
 

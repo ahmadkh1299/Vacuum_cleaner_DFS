@@ -34,6 +34,7 @@ void MyAlgorithm::initialize(int dockrow, int dockcol) {
     currentCol = dockcol;
     historyStack.push({currentRow, currentCol});
     updateUnexplored(currentRow, currentCol);
+    visited[{dockrow, dockcol}] = 20;
 }
 
 Step MyAlgorithm::nextStep() {
@@ -46,6 +47,9 @@ Step MyAlgorithm::nextStep() {
         visited[{currentRow, currentCol}] = dirtLevel - 1;
         return Step::Stay;
     }
+    if(visited.find({currentRow, currentCol}) == visited.end()){
+        updateUnexplored(currentRow, currentCol);
+    }
 
     return moveToNextCell();
 }
@@ -54,7 +58,6 @@ Step MyAlgorithm::moveToNextCell() {
     if (unexplored[{currentRow, currentCol}].empty()) {
         return backtrack();
     }
-
     Direction dir = unexplored[{currentRow, currentCol}].back();
     unexplored[{currentRow, currentCol}].pop_back();
 
@@ -63,7 +66,6 @@ Step MyAlgorithm::moveToNextCell() {
             if (isValidMove(currentRow - 1, currentCol)) {
                 currentRow--;
                 historyStack.push({currentRow, currentCol});
-                updateUnexplored(currentRow, currentCol);
                 return Step::North;
             }
             break;
@@ -71,7 +73,6 @@ Step MyAlgorithm::moveToNextCell() {
             if (isValidMove(currentRow, currentCol + 1)) {
                 currentCol++;
                 historyStack.push({currentRow, currentCol});
-                updateUnexplored(currentRow, currentCol);
                 return Step::East;
             }
             break;
@@ -79,7 +80,6 @@ Step MyAlgorithm::moveToNextCell() {
             if (isValidMove(currentRow + 1, currentCol)) {
                 currentRow++;
                 historyStack.push({currentRow, currentCol});
-                updateUnexplored(currentRow, currentCol);
                 return Step::South;
             }
             break;
@@ -87,7 +87,6 @@ Step MyAlgorithm::moveToNextCell() {
             if (isValidMove(currentRow, currentCol - 1)) {
                 currentCol--;
                 historyStack.push({currentRow, currentCol});
-                updateUnexplored(currentRow, currentCol);
                 return Step::West;
             }
             break;
@@ -129,6 +128,7 @@ bool MyAlgorithm::isValidMove(int row, int col) {
     if (row == currentRow + 1 && wallsSensor->isWall(Direction::South)) return false;
     if (col == currentCol - 1 && wallsSensor->isWall(Direction::West)) return false;
     if (col == currentCol + 1 && wallsSensor->isWall(Direction::East)) return false;
+
     return true;
 }
 
