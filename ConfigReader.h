@@ -1,9 +1,9 @@
 #ifndef CONFIG_READER_H
 #define CONFIG_READER_H
+
 #include <vector>
 #include <string>
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
 #include <regex>
 #include <algorithm>
@@ -36,13 +36,6 @@ public:
         return cols;
     }
 
-    void printLayout() const {
-        std::cout << "Layout:\n";
-        for (const auto& row : layout) {
-            std::cout << row << std::endl;
-        }
-    }
-
 private:
     std::vector<std::string> layout;
     int max_steps;
@@ -72,36 +65,12 @@ private:
         rows = parseValue("Rows", layout[3]);
         cols = parseValue("Cols", layout[4]);
 
-        // Validate layout size
-        if (layout.size() < rows + 5) {
-            throw std::runtime_error("Invalid file: Not enough house rows");
-        }
+        // Validate and extract the house layout
+        extractHouseLayout();
 
-        // Extract the house layout
-        std::vector<std::string> house_layout;
-        for (int i = 5; i < 5 + rows; ++i) {
-            house_layout.push_back(layout[i].substr(0, cols));
-        }
-
-        // Fill in missing rows and columns with '0'
-        while (house_layout.size() < rows) {
-            house_layout.push_back(std::string(cols, '0'));
-        }
-        for (auto &row : house_layout) {
-            if (row.size() < cols) {
-                row.append(cols - row.size(), '0');
-            }
-        }
-
-        layout = house_layout;
-
-        // Print the layout
-        std::cout << "House Layout:" << std::endl;
-        for (const auto& row : layout) {
-            std::cout << row << std::endl;
-        }
+        // Validate docking station and other requirements
+        validateDockingStation();
     }
-
 
     int parseValue(const std::string &key, const std::string &line) {
         std::regex re(key + "\\s*=\\s*(\\d+)");
@@ -111,6 +80,36 @@ private:
         } else {
             throw std::runtime_error("Invalid file: Missing or malformed " + key);
         }
+    }
+
+    void extractHouseLayout() {
+        std::vector<std::string> house_layout;
+        for (int i = 5; i < layout.size() && i < 5 + rows; ++i) {
+            house_layout.push_back(layout[i].substr(0, cols));
+        }
+
+        // Fill in missing rows with '0'
+        while (house_layout.size() < rows) {
+            house_layout.push_back(std::string(cols, '0'));
+        }
+
+        // Fill in missing columns with '0'
+        for (auto &row : house_layout) {
+            if (row.size() < cols) {
+                row.append(cols - row.size(), '0');
+            }
+        }
+
+        // Enclose the house layout with walls
+        for (auto& row : house_layout) {
+            row.insert(row.begin(), 'W');
+            row.push_back('W');
+        }
+        std::string wall_row(cols + 2, 'W');
+        house_layout.insert(house_layout.begin(), wall_row);
+        house_layout.push_back(wall_row);
+
+        layout = house_layout;
     }
 
     void validateDockingStation() {

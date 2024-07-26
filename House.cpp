@@ -3,33 +3,51 @@
 #include <algorithm>
 
 House::House()
-        : rows(0), cols(0), dockingStationRow(-1), dockingStationCol(-1), total_dirt(0) {
-    // house_matrix is implicitly initialized to an empty vector
-}
+        : rows(0), cols(0), dockingStationRow(-1), dockingStationCol(-1), total_dirt(0) {}
 
 House::House(const std::vector<std::string>& layout_v)
         : dockingStationRow(-1), dockingStationCol(-1), total_dirt(0) {
-    std::vector<std::string> layout_copy = layout_v;
-    addWallsPadding(layout_copy);
-    initializeMatrix(layout_copy);
+    // Print the received layout
+    std::cout << "Received Layout:\n";
+    for (const auto& row : layout_v) {
+        std::cout << row << '\n';
+    }
+
+    // Initialize the matrix with the layout
+    initializeMatrix(layout_v);
     findDockingStation();
     updateDirtCount();
     printMatrix();
 }
 
-void House::printMatrix() const {
-    std::cout << "House matrix:\n";
-    for (const auto& row : house_matrix) {
-        for (int cell : row) {
-            if (cell == -1) {
-                std::cout << "W ";
-            } else if (cell == 20) {
-                std::cout << "D ";
-            } else {
-                std::cout << cell << ' ';
-            }
+void House::addWallsPadding(std::vector<std::string>& layout_v) {
+    // Ensure each row has the correct number of columns, padding with spaces
+    for (auto& row : layout_v) {
+        if (row.size() < cols) {
+            row.append(cols - row.size(), '0');
         }
-        std::cout << '\n';
+    }
+
+    // Add walls only if not already present
+    if (layout_v.size() < rows) {
+        // Add missing rows filled with '0'
+        while (layout_v.size() < rows) {
+            layout_v.push_back(std::string(cols, '0'));
+        }
+    }
+
+    // Enclose the layout with walls
+    for (auto& row : layout_v) {
+        if (row[0] != 'W') row.insert(row.begin(), 'W');
+        if (row.back() != 'W') row.push_back('W');
+    }
+
+    // If necessary, add a row of walls at the top and bottom
+    if (layout_v.front()[0] != 'W') {
+        layout_v.insert(layout_v.begin(), std::string(cols + 2, 'W'));
+    }
+    if (layout_v.back()[0] != 'W') {
+        layout_v.push_back(std::string(cols + 2, 'W'));
     }
 }
 
@@ -63,61 +81,6 @@ void House::findDockingStation() {
     }
 }
 
-void House::addWallsPadding(std::vector<std::string>& layout_v) {
-    int max_length = 0;
-
-    // Determine the maximum length of the rows
-    for (const auto& row : layout_v) {
-        if (row.size() > max_length) {
-            max_length = row.size();
-        }
-    }
-
-    // Pad each row to the maximum length with spaces
-    for (auto& row : layout_v) {
-        while (row.size() < max_length) {
-            row.push_back(' ');
-        }
-    }
-
-    bool needs_walls = false;
-
-    // Check top and bottom rows for missing walls
-    for (char c : layout_v[0]) {
-        if (c != 'W') {
-            needs_walls = true;
-            break;
-        }
-    }
-    for (char c : layout_v[layout_v.size() - 1]) {
-        if (c != 'W') {
-            needs_walls = true;
-            break;
-        }
-    }
-
-    // Check left and right columns for missing walls
-    if (!needs_walls) {
-        for (const auto& row : layout_v) {
-            if (row[0] != 'W' || row[max_length - 1] != 'W') {
-                needs_walls = true;
-                break;
-            }
-        }
-    }
-
-    // Add walls padding if needed
-    if (needs_walls) {
-        for (auto& row : layout_v) {
-            row.insert(row.begin(), 'W');
-            row.push_back('W');
-        }
-        std::string wall_row(max_length + 2, 'W');
-        layout_v.insert(layout_v.begin(), wall_row);
-        layout_v.push_back(wall_row);
-    }
-}
-
 void House::updateDirtCount() {
     total_dirt = 0;
     for (const auto& row : house_matrix) {
@@ -126,6 +89,22 @@ void House::updateDirtCount() {
                 total_dirt += cell;
             }
         }
+    }
+}
+
+void House::printMatrix() const {
+    std::cout << "House matrix:\n";
+    for (const auto& row : house_matrix) {
+        for (int cell : row) {
+            if (cell == -1) {
+                std::cout << "W ";
+            } else if (cell == 20) {
+                std::cout << "D ";
+            } else {
+                std::cout << cell << ' ';
+            }
+        }
+        std::cout << '\n';
     }
 }
 
