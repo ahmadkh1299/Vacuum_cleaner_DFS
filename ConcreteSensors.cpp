@@ -5,10 +5,10 @@ ConcreteWallsSensor::ConcreteWallsSensor(const House& house, int row, int col)
 
 bool ConcreteWallsSensor::isWall(Direction d) const {
     switch (d) {
-        case Direction::North: return house.getCell(row - 1, col) == 'W';
-        case Direction::East: return house.getCell(row, col + 1) == 'W';
-        case Direction::South: return house.getCell(row + 1, col) == 'W';
-        case Direction::West: return house.getCell(row, col - 1) == 'W';
+        case Direction::North: return house.getCell(row - 1, col) == -1;
+        case Direction::East: return house.getCell(row, col + 1) == -1;
+        case Direction::South: return house.getCell(row + 1, col) == -1;
+        case Direction::West: return house.getCell(row, col - 1) == -1;
         default: return true;
     }
 }
@@ -22,8 +22,7 @@ ConcreteDirtSensor::ConcreteDirtSensor(const House& house, int row, int col)
         : house(house), row(row), col(col) {}
 
 int ConcreteDirtSensor::dirtLevel() const {
-    char cell = house.getCell(row, col);
-    return (cell >= '1' && cell <= '9') ? cell - '0' : 0;
+    return house.getCell(row,col);
 }
 
 void ConcreteDirtSensor::updatePosition(int row, int col) {
