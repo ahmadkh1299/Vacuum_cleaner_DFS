@@ -5,6 +5,7 @@
 #include "ConcreteSensors.h"
 #include "abstract_algorithm.h"
 #include "Vacuum.h"
+#include "ConfigReader.h"
 #include <memory>
 #include <vector>
 #include <string>
@@ -19,6 +20,8 @@ public:
 
 private:
     House house;
+    int maxSteps;
+    int maxBattery;
     std::unique_ptr<ConcreteWallsSensor> wallsSensor;
     std::unique_ptr<ConcreteDirtSensor> dirtSensor;
     std::unique_ptr<ConcreteBatteryMeter> batteryMeter;

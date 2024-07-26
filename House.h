@@ -6,30 +6,31 @@
 
 class House {
 public:
-    House(const std::string& filePath = "");
-    bool isValid() const;
-    int getMaxSteps() const;
-    int getMaxBattery() const;
+    House();
+    House(const std::vector<std::string>& layout_v);
+
     int getRows() const;
     int getCols() const;
     int getDockingStationRow() const;
     int getDockingStationCol() const;
-    char getCell(int row, int col) const;
+    int getCell(int row, int col) const;
     void cleanCell(int row, int col);
     bool isHouseClean() const;
 
+    void printMatrix() const;
+
 private:
-    std::string name;
-    int maxSteps;
-    int maxBattery;
     int rows;
     int cols;
-    std::vector<std::vector<char>> layout;
-    bool valid;
     int dockingStationRow;
     int dockingStationCol;
-    int curr_dirt;
-    void parseHouseFile(const std::string& filePath);
+    int total_dirt;
+    std::vector<std::vector<int>> house_matrix;
+    bool valid;
+
+    void addWallsPadding(std::vector<std::string>& layout_v);
+    void initializeMatrix(const std::vector<std::string>& layout_v);
+    void findDockingStation();
     void updateDirtCount();
 };
 

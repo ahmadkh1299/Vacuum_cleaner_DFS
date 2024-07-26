@@ -21,41 +21,40 @@ void MyAlgorithm::setBatteryMeter(const BatteryMeter& meter) {
     this->batteryMeter = &meter;
 }
 
-void MyAlgorithm::initialize() {
+void MyAlgorithm::setDockingStation(int Row, int Col) {
+    dockingRow = Row;
+    dockingCol = Col;
+}
+
+void MyAlgorithm::initialize(int dockrow, int dockcol) {
     if (isInitialized) return;
     isInitialized = true;
 
-    // Assume that the initial position is the docking station
-    currentRow = dockingRow;
-    currentCol = dockingCol;
+    currentRow = dockrow;
+    currentCol = dockcol;
     historyStack.push({currentRow, currentCol});
     updateUnexplored(currentRow, currentCol);
 }
 
 Step MyAlgorithm::nextStep() {
     if (!isInitialized) {
-        initialize();
+        initialize(dockingRow, dockingCol); // Initialize using docking coordinates
     }
 
-    // Clean the current cell if it has dirt
     int dirtLevel = dirtSensor->dirtLevel();
-    if (dirtLevel > 0) {
-        // Record the cleaned dirt level
+    if (dirtLevel > 0 && dirtLevel<=9) {
         visited[{currentRow, currentCol}] = dirtLevel - 1;
         return Step::Stay;
     }
 
-    // Continue exploring or backtrack if all nearby areas are explored
     return moveToNextCell();
 }
 
 Step MyAlgorithm::moveToNextCell() {
-    // If the current cell is fully explored, backtrack
     if (unexplored[{currentRow, currentCol}].empty()) {
         return backtrack();
     }
 
-    // Move to the next unexplored direction
     Direction dir = unexplored[{currentRow, currentCol}].back();
     unexplored[{currentRow, currentCol}].pop_back();
 
@@ -98,7 +97,6 @@ Step MyAlgorithm::moveToNextCell() {
 }
 
 Step MyAlgorithm::backtrack() {
-    // If all cells have been visited, the task is complete
     if (historyStack.empty()) {
         return Step::Finish;
     }

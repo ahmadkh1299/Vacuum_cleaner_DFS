@@ -3,31 +3,40 @@
 #include <fstream>
 
 Simulation::Simulation()
-        : house(""), currentRow(0), currentCol(0), algorithm(nullptr), steps(0) {}
+        : house(), maxSteps(0), maxBattery(0), currentRow(0), currentCol(0), algorithm(nullptr), steps(0) {}
 
 bool Simulation::readHouseFile(const std::string& houseFilePath) {
-    house = House(houseFilePath);
-    if (!house.isValid()) {
-        std::cerr << "Invalid house file." << std::endl;
+    try {
+        ConfigReader config(houseFilePath);
+        maxSteps = config.getMaxSteps();
+        maxBattery = config.getMaxBattery();
+        house = House(config.getLayout());
+
+        currentRow = house.getDockingStationRow();
+        currentCol = house.getDockingStationCol();
+
+        wallsSensor = std::make_unique<ConcreteWallsSensor>(house, currentRow, currentCol);
+        dirtSensor = std::make_unique<ConcreteDirtSensor>(house, currentRow, currentCol);
+        batteryMeter = std::make_unique<ConcreteBatteryMeter>(maxBattery);
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
         return false;
     }
-
-    currentRow = house.getDockingStationRow();
-    currentCol = house.getDockingStationCol();
-
-    wallsSensor = std::make_unique<ConcreteWallsSensor>(house, currentRow, currentCol);
-    dirtSensor = std::make_unique<ConcreteDirtSensor>(house, currentRow, currentCol);
-    batteryMeter = std::make_unique<ConcreteBatteryMeter>(house.getMaxBattery());
-
     return true;
 }
 
 void Simulation::setAlgorithm(AbstractAlgorithm& algo) {
     algorithm = &algo;
-    algorithm->setMaxSteps(house.getMaxSteps());
+    algorithm->setMaxSteps(maxSteps);
     algorithm->setWallsSensor(*wallsSensor);
     algorithm->setDirtSensor(*dirtSensor);
     algorithm->setBatteryMeter(*batteryMeter);
+
+    // Set docking station if the algorithm supports it
+    MyAlgorithm* myAlgo = dynamic_cast<MyAlgorithm*>(algorithm);
+    if (myAlgo) {
+        myAlgo->setDockingStation(currentRow, currentCol);
+    }
 }
 
 void Simulation::run() {
@@ -36,7 +45,7 @@ void Simulation::run() {
         return;
     }
 
-    Vacuum vacuum(*algorithm, *wallsSensor, *dirtSensor, *batteryMeter, house.getMaxSteps(), house);
+    Vacuum vacuum(*algorithm, *wallsSensor, *dirtSensor, *batteryMeter, maxSteps, house);
     vacuum.start();
     vacuum.outputResults("simulation_output.txt");
 }
@@ -49,7 +58,7 @@ void Simulation::writeOutputFile(const std::string& outputFilePath) {
     }
 
     int dirtLeft = calculateDirtLeft();
-    std::string status = (steps < house.getMaxSteps() && batteryMeter->getBatteryState() > 0) ? "FINISHED" : "WORKING";
+    std::string status = (steps < maxSteps && batteryMeter->getBatteryState() > 0) ? "FINISHED" : "WORKING";
 
     outputFile << "NumSteps = " << steps << "\n";
     outputFile << "DirtLeft = " << dirtLeft << "\n";
@@ -97,9 +106,9 @@ int Simulation::calculateDirtLeft() const {
     int totalDirt = 0;
     for (int i = 0; i < house.getRows(); ++i) {
         for (int j = 0; j < house.getCols(); ++j) {
-            char cell = house.getCell(i, j);
-            if (cell >= '1' && cell <= '9') {
-                totalDirt += cell - '0';
+            int cell = house.getCell(i, j);
+            if (cell > 0 && cell < 20) {
+                totalDirt += cell;
             }
         }
     }
