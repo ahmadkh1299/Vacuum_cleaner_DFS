@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 
-Vacuum::Vacuum(MyAlgorithm& algorithm, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps, const House& house)
+Vacuum::Vacuum(MyAlgorithm& algorithm, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps,House& house)
         : algorithm(algorithm), wallsSensor(wallsSensor), dirtSensor(dirtSensor), batteryMeter(batteryMeter),
           max_mission_steps(max_mission_steps), total_steps(0), current_location(0, 0), house(house) {}
 
@@ -27,17 +27,25 @@ void Vacuum::start() {
         }
 
 
-            Step nextStep = algorithm.nextStep();
-            logStep(nextStep);
-            if (!move(nextStep)) {
-                std::cout << "Cannot move in direction: " << static_cast<int>(nextStep) << std::endl;
-                break;
+        Step nextStep = algorithm.nextStep();
+        logStep(nextStep);
+
+        if (nextStep == Step::Stay) {
+            int dirtLevel = dirtSensor.dirtLevel();
+            if (dirtLevel > 0) {
+                house.cleanCell(current_location.first, current_location.second);
+                std::cout << "Cleaned cell at (" << current_location.first << ", " << current_location.second
+                          << "). New dirt level: " << dirtSensor.dirtLevel() << std::endl;
             }
-            printf("%d ,%d\n",current_location.first, current_location.second);
-            updatebat(); //update battery steps
-            total_steps++; // update total stepss
-            wallsSensor.updatePosition(current_location.first, current_location.second);
-            dirtSensor.updatePosition(current_location.first, current_location.second);
+        } else if (!move(nextStep)) {
+            std::cout << "Cannot move in direction: " << static_cast<int>(nextStep) << std::endl;
+            break;
+        }
+        printf("%d ,%d\n",current_location.first, current_location.second);
+        updatebat(); //update battery steps
+        total_steps++; // update total steps
+        wallsSensor.updatePosition(current_location.first, current_location.second);
+        dirtSensor.updatePosition(current_location.first, current_location.second);
         }
     }
 

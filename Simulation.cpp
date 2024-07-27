@@ -179,7 +179,11 @@ void Simulation::run() {
     MyAlgorithm* myAlgo = dynamic_cast<MyAlgorithm*>(algorithm);
     Vacuum vacuum(*myAlgo, *wallsSensor, *dirtSensor, *batteryMeter, maxSteps, house);
     vacuum.start();
-    vacuum.outputResults("C:\\Users\\97250\\Desktop\\TAU\\5th\\Advanced Programing\\Vacuum_cleaner_DFS\\simulation_output.txt");
+    int finalDirtLeft = house.calculateTotalDirt();
+    std::cout << "Final dirt left: " << finalDirtLeft << std::endl;
+    vacuum.outputResults("C:\\Users\\Mariam\\Desktop\\Vacuum_cleaner_DFS\\outputsimtxt");
+    //writeOutputFile("C:\\Users\\Mariam\\Desktop\\Vacuum_cleaner_DFS\\outputsimtxt", finalDirtLeft);
+
 }
 
 void Simulation::writeOutputFile(const std::string& outputFilePath) {
@@ -257,4 +261,24 @@ std::string Simulation::stepToString(Step step) const {
         case Step::Finish: return "F";
         default: return "";
     }
+}
+void Simulation::writeOutputFile(const std::string& outputFilePath, int finalDirtLeft) {
+    std::ofstream outputFile(outputFilePath);
+    if (!outputFile.is_open()) {
+        std::cerr << "Failed to open output file: " << outputFilePath << std::endl;
+        return;
+    }
+
+    int dirtLeft = finalDirtLeft;
+    std::string status = (steps < maxSteps && batteryMeter->getBatteryState() > 0) ? "FINISHED" : "WORKING";
+
+    outputFile << "NumSteps = " << steps << "\n";
+    outputFile << "DirtLeft = " << dirtLeft << "\n";
+    outputFile << "Status = " << status << "\n";
+    outputFile << "Steps:\n";
+
+    for (const Step& step : stepHistory) {
+        outputFile << stepToString(step);
+    }
+    outputFile.close();
 }

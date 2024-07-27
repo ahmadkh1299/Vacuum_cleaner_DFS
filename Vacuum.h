@@ -11,10 +11,10 @@
 
 class Vacuum {
 public:
-    Vacuum(MyAlgorithm& Myalgo, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps, const House& house);
+    Vacuum(MyAlgorithm& Myalgo, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps,House& house);
 
     Vacuum(AbstractAlgorithm &algorithm, ConcreteWallsSensor &wallsSensor, ConcreteDirtSensor &dirtSensor,
-           ConcreteBatteryMeter &batteryMeter, int max_mission_steps, const House &house);
+           ConcreteBatteryMeter &batteryMeter, int max_mission_steps, House &house);
 
     void outputResults(const std::string& output_file) const;
     void start();
@@ -24,7 +24,7 @@ private:
     ConcreteWallsSensor& wallsSensor;
     ConcreteDirtSensor& dirtSensor;
     ConcreteBatteryMeter& batteryMeter;
-    const House& house;
+    House& house;
     int max_mission_steps;
     int total_steps;
     std::pair<int, int> current_location;

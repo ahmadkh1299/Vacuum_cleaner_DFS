@@ -134,7 +134,7 @@ int House::getCell(int row, int col) const {
     return house_matrix[row][col];
 }
 
-void House::cleanCell(int row, int col) {
+/*void House::cleanCell(int row, int col){
     if (row < 0 || row >= rows || col < 0 || col >= cols) {
         return; // Ignore out-of-bound cells
     }
@@ -143,8 +143,29 @@ void House::cleanCell(int row, int col) {
         house_matrix[row][col]--;
         total_dirt--;
     }
+}*/
+void House::cleanCell(int row, int col) {
+    if (row >= 0 && row < rows && col >= 0 && col < cols) {
+        if (house_matrix[row][col] > 0 && house_matrix[row][col] < 20) {
+            house_matrix[row][col]--;
+            total_dirt--;
+            std::cout << "Cleaned cell at (" << row << ", " << col
+                      << "). New dirt level: " << house_matrix[row][col] << std::endl;
+        }
+    }
 }
 
 bool House::isHouseClean() const {
     return total_dirt < 1;
+}
+int House::calculateTotalDirt() const {
+    int totalDirt = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (house_matrix[i][j] > 0 && house_matrix[i][j] < 20) {
+                totalDirt += house_matrix[i][j];
+            }
+        }
+    }
+    return totalDirt;
 }

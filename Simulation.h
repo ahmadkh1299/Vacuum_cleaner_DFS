@@ -17,6 +17,8 @@ public:
     void setAlgorithm(AbstractAlgorithm& algo);
     void run();
     void writeOutputFile(const std::string& outputFilePath);
+    void writeOutputFile(const std::string &outputFilePath, int finalDirtLeft);
+
 
 private:
     House house;
@@ -35,6 +37,7 @@ private:
     bool atDockingStation() const;
     int calculateDirtLeft() const;
     std::string stepToString(Step step) const;
+
 };
 
 #endif // SIMULATION_H

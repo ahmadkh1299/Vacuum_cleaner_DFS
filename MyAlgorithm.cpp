@@ -38,29 +38,30 @@ void MyAlgorithm::initialize(int dockrow, int dockcol) {
     visited[{dockrow, dockcol}] = 20;
 }
 
+
 Step MyAlgorithm::nextStep() {
     if (!isInitialized) {
         initialize(dockingRow, dockingCol);
     }
 
-    /*int remainingBattery = batteryMeter->getBatteryState();
-    if (remainingBattery <= historyStack.size()+2) {
-        return backtrackToDocking();
-    }*/
-
     int dirtLevel = dirtSensor->dirtLevel();
-    if (dirtLevel > 0 && dirtLevel <= 9) {
-        visited[{currentRow, currentCol}] = dirtLevel - 1;
-        return Step::Stay;
+    std::pair<int, int> currentPos = {currentRow, currentCol};
+
+    if (dirtLevel > 0 and dirtLevel <10) {
+        if (visited.find(currentPos) == visited.end() || visited[currentPos] > 0 && visited[currentPos]<10) {
+            visited[currentPos] = dirtLevel - 1;  // Update the dirt level
+            std::cout << "Staying to clean at (" << currentRow << ", " << currentCol << "). Dirt level: " << dirtLevel << std::endl;
+            return Step::Stay;
+        }
     }
 
-    if (visited.find({currentRow, currentCol}) == visited.end()) {
+    if (visited.find(currentPos) == visited.end()) {
+        visited[currentPos] = 0;  // Mark as visited with no dirt
         updateUnexplored(currentRow, currentCol);
     }
 
     return moveToNextCell();
 }
-
 Step MyAlgorithm::moveToNextCell() {
     if (unexplored[{currentRow, currentCol}].empty()) {
         return backtrack();// we need a function to start again in the cells not visited yet
@@ -110,7 +111,6 @@ Step MyAlgorithm::backtrack() {
     if (historyStack.empty()) {
         return moveToNextCell();// we need to charge , update battery , and start again
     }
-
     std::pair<int, int> prev = historyStack.top();
     historyStack.pop();
 
