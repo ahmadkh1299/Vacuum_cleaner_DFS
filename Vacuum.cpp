@@ -9,6 +9,22 @@ Vacuum::Vacuum(MyAlgorithm& algorithm, ConcreteWallsSensor& wallsSensor, Concret
 void Vacuum::start() {
     current_location = std::make_pair(house.getDockingStationRow(), house.getDockingStationCol());
     while (total_steps < max_mission_steps && batteryMeter.getBatteryState() > 0) {
+        if (batteryMeter.getBatteryState() <= history.size()) {
+            std::stack<Direction> path_to_docking = algorithm.findPathToDocking(history);
+            while ((!path_to_docking.empty())  && total_steps<max_mission_steps) {
+                move(path_to_docking.top());
+                path_to_docking.pop();
+                if (!locatedAtDockingStation()) {
+                    update();
+                }
+            }
+            if (locatedAtDockingStation()) {
+                chargeBattery();
+                history = std::stack<Direction>();
+            }
+            // Clear history after recharging
+            // continue;
+        } else {
         bool charging=algorithm.startcharging;
         if(charging){
             chargeBattery();

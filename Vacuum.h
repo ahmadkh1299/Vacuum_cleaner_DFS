@@ -11,7 +11,7 @@
 
 class Vacuum {
 public:
-    Vacuum(MyAlgorithm& algorithm, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps, const House& house);
+    Vacuum(MyAlgorithm& Myalgo, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps, const House& house);
 
     Vacuum(AbstractAlgorithm &algorithm, ConcreteWallsSensor &wallsSensor, ConcreteDirtSensor &dirtSensor,
            ConcreteBatteryMeter &batteryMeter, int max_mission_steps, const House &house);
