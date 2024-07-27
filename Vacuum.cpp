@@ -39,7 +39,7 @@ void Vacuum::start() {
             dirtSensor.updatePosition(current_location.first, current_location.second);
         }
     }
-}
+
 
     void Vacuum::outputResults(const std::string& output_file) const {
         std::ofstream file(output_file);
