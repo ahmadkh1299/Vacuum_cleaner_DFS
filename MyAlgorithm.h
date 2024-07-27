@@ -17,6 +17,10 @@ public:
     void setBatteryMeter(const BatteryMeter& meter) override;
     void setDockingStation(int Row, int Col);
     Step nextStep() override;
+    void notcharging(){startcharging= false;}
+    bool startcharging;
+
+
 
 private:
     std::size_t maxSteps;
@@ -28,6 +32,8 @@ private:
     std::map<std::pair<int, int>, std::vector<Direction>> unexplored;
     bool goingBacktoDoking;
     bool Cleaning;
+
+
 
 
 

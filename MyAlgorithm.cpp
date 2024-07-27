@@ -63,7 +63,7 @@ Step MyAlgorithm::nextStep() {
 
 Step MyAlgorithm::moveToNextCell() {
     if (unexplored[{currentRow, currentCol}].empty()) {
-        return backtrack();
+        return backtrack();// we need a function to start again in the cells not visited yet
     }
 
     Direction dir = unexplored[{currentRow, currentCol}].back();
@@ -108,7 +108,9 @@ Step MyAlgorithm::moveToNextCell() {
 
 Step MyAlgorithm::backtrack() {
     if (historyStack.empty()) {
-        return moveToNextCell();
+        if (dockingCol==currentCol && dockingRow==currentRow)
+        { startcharging= true; }
+        return moveToNextCell();// we need to charge , update battery , and start again
     }
 
     std::pair<int, int> prev = historyStack.top();

@@ -17,6 +17,7 @@ public:
 	virtual void setDirtSensor(const DirtSensor&) = 0;
 	virtual void setBatteryMeter(const BatteryMeter&) = 0;
 	virtual Step nextStep() = 0;
+
 };
 
 #endif  // ROBOT_ALGORITHM_H__

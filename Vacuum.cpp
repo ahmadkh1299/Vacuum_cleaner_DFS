@@ -2,13 +2,21 @@
 #include <iostream>
 #include <fstream>
 
-Vacuum::Vacuum(AbstractAlgorithm& algorithm, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps, const House& house)
+Vacuum::Vacuum(MyAlgorithm& algorithm, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps, const House& house)
         : algorithm(algorithm), wallsSensor(wallsSensor), dirtSensor(dirtSensor), batteryMeter(batteryMeter),
           max_mission_steps(max_mission_steps), total_steps(0), current_location(0, 0), house(house) {}
 
 void Vacuum::start() {
     current_location = std::make_pair(house.getDockingStationRow(), house.getDockingStationCol());
     while (total_steps < max_mission_steps && batteryMeter.getBatteryState() > 0) {
+        bool charging=algorithm.startcharging;
+        if(charging){
+            chargeBattery();
+            algorithm.notcharging();
+            total_steps+=20;
+        }
+
+
         Step nextStep = algorithm.nextStep();
         logStep(nextStep);
         if (!move(nextStep)) {

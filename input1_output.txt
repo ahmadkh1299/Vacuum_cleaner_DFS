@@ -1,4 +1,0 @@
-NumSteps = 0
-DirtLeft = 28
-Status = WORKING
-Steps:
