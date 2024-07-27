@@ -45,6 +45,7 @@ private:
     void update();
     std::vector<std::string> log;
 
+    void updatebat();
 };
 
 #endif // CHATGPT_VACUUM_H

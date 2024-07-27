@@ -35,7 +35,7 @@ void MyAlgorithm::initialize(int dockrow, int dockcol) {
     currentCol = dockcol;
     historyStack.push({currentRow, currentCol});
     updateUnexplored(currentRow, currentCol);
-    //visited[{dockrow, dockcol}] = 20;
+    visited[{dockrow, dockcol}] = 20;
 }
 
 Step MyAlgorithm::nextStep() {

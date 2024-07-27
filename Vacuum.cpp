@@ -34,7 +34,8 @@ void Vacuum::start() {
                 break;
             }
             printf("%d ,%d\n",current_location.first, current_location.second);
-            total_steps++;
+            updatebat(); //update battery steps
+            total_steps++; // update total stepss
             wallsSensor.updatePosition(current_location.first, current_location.second);
             dirtSensor.updatePosition(current_location.first, current_location.second);
         }
@@ -109,3 +110,5 @@ void Vacuum::chargeBattery() { // charging
     bool Vacuum::locatedAtDockingStation() const {
         return current_location == std::make_pair(house.getDockingStationRow(), house.getDockingStationCol());
     }
+    void Vacuum::update() { batteryMeter.useBattery(); total_steps++; }
+    void Vacuum::updatebat() { batteryMeter.useBattery(); }
