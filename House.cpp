@@ -67,7 +67,7 @@ void House::initializeMatrix(const std::vector<std::string>& layout_v) {
             } else if (cell == 'D') {
                 dockingStationRow = i;
                 dockingStationCol = j;
-                house_matrix[i][j] = 20;
+                house_matrix[i][j] = -20;
             } else {
                 house_matrix[i][j] = 0;
             }
@@ -101,7 +101,7 @@ void House::printMatrix() const {
         for (int cell : row) {
             if (cell == -1) {
                 std::cout << "W ";
-            } else if (cell == 20) {
+            } else if (cell == -20) {
                 std::cout << "D ";
             } else {
                 std::cout << cell << ' ';
