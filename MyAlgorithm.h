@@ -19,10 +19,9 @@ public:
     Step nextStep() override;
     void notcharging(){startcharging= false;}
     bool startcharging;
+    std::stack<Step> findPathToDocking(const std::stack<Step>& history);
 
-
-
-private:
+        private:
     std::size_t maxSteps;
     const WallsSensor* wallsSensor;
     const DirtSensor* dirtSensor;
@@ -47,6 +46,7 @@ private:
     Step backtrackToDocking(); // Declaration of the new method
     bool isValidMove(int row, int col);
     void updateUnexplored(int row, int col);
-};
+    Step reverseDirection(Step direction);
+    };
 
 #endif // MY_ALGORITHM_H

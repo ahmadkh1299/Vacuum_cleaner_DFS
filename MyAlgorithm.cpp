@@ -196,3 +196,37 @@ void MyAlgorithm::updateUnexplored(int row, int col) {
         }
     }
 }
+std::stack<Step> MyAlgorithm::findPathToDocking(const std::stack<Step>& history) {
+    std::stack<Step> path;
+    std::stack<Step> temp_history = history;  // Copy of the original history stack to preserve order
+    std::stack<Step> reversed = std::stack<Step>();
+    while (!temp_history.empty()) {
+        reversed.push(temp_history.top());
+        temp_history.pop();
+    }
+    temp_history = reversed;
+    reversed = std::stack<Step>();
+    while (!temp_history.empty()) {
+        Step move = reverseDirection(temp_history.top());
+        temp_history.pop();
+        if (move != Step::Stay) {
+            reversed.push(move);
+        }
+    }
+    return reversed;
+}
+Step MyAlgorithm::reverseDirection(Step direction) {
+    switch (direction) {
+        case Step::North:
+            return Step::South;
+        case Step::East:
+            return Step::West;
+        case Step::South:
+            return Step::North;
+        case Step::West:
+            return Step::East;
+        case Step::Stay:
+        default:
+            return Step::Stay;
+    }
+}
