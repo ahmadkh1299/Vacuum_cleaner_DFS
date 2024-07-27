@@ -176,8 +176,8 @@ void Simulation::run() {
         std::cerr << "Simulation components not initialized properly." << std::endl;
         return;
     }
-
-    Vacuum vacuum(*algorithm, *wallsSensor, *dirtSensor, *batteryMeter, maxSteps, house);
+    MyAlgorithm* myAlgo = dynamic_cast<MyAlgorithm*>(algorithm);
+    Vacuum vacuum(*myAlgo, *wallsSensor, *dirtSensor, *batteryMeter, maxSteps, house);
     vacuum.start();
     vacuum.outputResults("C:\\Users\\97250\\Desktop\\TAU\\5th\\Advanced Programing\\Vacuum_cleaner_DFS\\simulation_output.txt");
 }

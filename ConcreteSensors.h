@@ -34,10 +34,12 @@ public:
     std::size_t getBatteryState() const override;
     void useBattery();
     void chargeBattery(int stepsStayedAtDock);
+    int getmaxBattery() const;
 
 private:
     int maxBattery;
     int currentBattery;
+
 };
 
 #endif // CONCRETE_SENSORS_H

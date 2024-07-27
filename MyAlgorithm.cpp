@@ -35,7 +35,7 @@ void MyAlgorithm::initialize(int dockrow, int dockcol) {
     currentCol = dockcol;
     historyStack.push({currentRow, currentCol});
     updateUnexplored(currentRow, currentCol);
-    visited[{dockrow, dockcol}] = 20;
+    //visited[{dockrow, dockcol}] = 20;
 }
 
 Step MyAlgorithm::nextStep() {
@@ -43,10 +43,10 @@ Step MyAlgorithm::nextStep() {
         initialize(dockingRow, dockingCol);
     }
 
-    int remainingBattery = batteryMeter->getBatteryState();
+    /*int remainingBattery = batteryMeter->getBatteryState();
     if (remainingBattery <= historyStack.size()+2) {
         return backtrackToDocking();
-    }
+    }*/
 
     int dirtLevel = dirtSensor->dirtLevel();
     if (dirtLevel > 0 && dirtLevel <= 9) {
@@ -108,8 +108,6 @@ Step MyAlgorithm::moveToNextCell() {
 
 Step MyAlgorithm::backtrack() {
     if (historyStack.empty()) {
-        if (dockingCol==currentCol && dockingRow==currentRow)
-        { startcharging= true; }
         return moveToNextCell();// we need to charge , update battery , and start again
     }
 
@@ -194,5 +192,39 @@ void MyAlgorithm::updateUnexplored(int row, int col) {
         if (isValidMove(newRow, newCol) && visited.find({newRow, newCol}) == visited.end()) {
             unexplored[{row, col}].push_back(dir);
         }
+    }
+}
+std::stack<Step> MyAlgorithm::findPathToDocking(const std::stack<Step>& history) {
+    std::stack<Step> path;
+    std::stack<Step> temp_history = history;  // Copy of the original history stack to preserve order
+    std::stack<Step> reversed = std::stack<Step>();
+    while (!temp_history.empty()) {
+        reversed.push(temp_history.top());
+        temp_history.pop();
+    }
+    temp_history = reversed;
+    reversed = std::stack<Step>();
+    while (!temp_history.empty()) {
+        Step move = reverseDirection(temp_history.top());
+        temp_history.pop();
+        if (move != Step::Stay) {
+            reversed.push(move);
+        }
+    }
+    return reversed;
+}
+Step MyAlgorithm::reverseDirection(Step direction) {
+    switch (direction) {
+        case Step::North:
+            return Step::South;
+        case Step::East:
+            return Step::West;
+        case Step::South:
+            return Step::North;
+        case Step::West:
+            return Step::East;
+        case Step::Stay:
+        default:
+            return Step::Stay;
     }
 }

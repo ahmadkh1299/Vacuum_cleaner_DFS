@@ -17,12 +17,9 @@ public:
     void setBatteryMeter(const BatteryMeter& meter) override;
     void setDockingStation(int Row, int Col);
     Step nextStep() override;
-    void notcharging(){startcharging= false;}
-    bool startcharging;
+    std::stack<Step> findPathToDocking(const std::stack<Step>& history);
 
-
-
-private:
+    private:
     std::size_t maxSteps;
     const WallsSensor* wallsSensor;
     const DirtSensor* dirtSensor;
@@ -30,8 +27,7 @@ private:
     std::stack<std::pair<int, int>> historyStack;
     std::map<std::pair<int, int>, int> visited;
     std::map<std::pair<int, int>, std::vector<Direction>> unexplored;
-    bool goingBacktoDoking;
-    bool Cleaning;
+
 
 
 
@@ -47,6 +43,7 @@ private:
     Step backtrackToDocking(); // Declaration of the new method
     bool isValidMove(int row, int col);
     void updateUnexplored(int row, int col);
-};
+    Step reverseDirection(Step direction);
+    };
 
 #endif // MY_ALGORITHM_H
