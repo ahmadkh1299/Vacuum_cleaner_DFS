@@ -94,6 +94,9 @@ void House::updateDirtCount() {
 
 void House::printMatrix() const {
     std::cout << "House matrix:\n";
+    std::cout << "The number is: " << dockingStationRow << std::endl;
+    std::cout << "The number is: " << dockingStationCol << std::endl;
+
     for (const auto& row : house_matrix) {
         for (int cell : row) {
             if (cell == -1) {

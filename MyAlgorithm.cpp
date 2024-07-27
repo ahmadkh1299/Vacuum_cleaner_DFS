@@ -44,7 +44,7 @@ Step MyAlgorithm::nextStep() {
     }
 
     int remainingBattery = batteryMeter->getBatteryState();
-    if (remainingBattery <= historyStack.size()) {
+    if (remainingBattery <= historyStack.size()+2) {
         return backtrackToDocking();
     }
 
@@ -108,7 +108,7 @@ Step MyAlgorithm::moveToNextCell() {
 
 Step MyAlgorithm::backtrack() {
     if (historyStack.empty()) {
-        return Step::Finish;
+        return moveToNextCell();
     }
 
     std::pair<int, int> prev = historyStack.top();
@@ -140,7 +140,7 @@ Step MyAlgorithm::backtrack() {
 
 Step MyAlgorithm::backtrackToDocking() {
     if (historyStack.empty()) {
-        return Step::Finish;
+        return moveToNextCell();
     }
 
     std::pair<int, int> prev = historyStack.top();

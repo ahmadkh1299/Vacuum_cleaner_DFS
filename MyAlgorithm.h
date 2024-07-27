@@ -26,6 +26,10 @@ private:
     std::stack<std::pair<int, int>> historyStack;
     std::map<std::pair<int, int>, int> visited;
     std::map<std::pair<int, int>, std::vector<Direction>> unexplored;
+    bool goingBacktoDoking;
+    bool Cleaning;
+
+
 
     int currentRow, currentCol;
     int dockingRow, dockingCol;
