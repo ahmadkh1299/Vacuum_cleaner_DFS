@@ -66,7 +66,7 @@ void Vacuum::start() {
             }
 
             // Return to last cleaned position after charging
-            if((max_mission_steps-total_steps)>path_back_to_last_cleaned.size()) {
+            if((max_mission_steps-total_steps)-1>path_back_to_last_cleaned.size()) {
                 while (!path_back_to_last_cleaned.empty() && total_steps < max_mission_steps) {
                     move(path_back_to_last_cleaned.top());
                     path_back_to_last_cleaned.pop();
@@ -168,13 +168,17 @@ bool Vacuum::move(Step step) {
 
 
 void Vacuum::chargeBattery() { // charging
-    printf("start charging, currbattery %d\n", batteryMeter.getBatteryState());
+    std::cout << "start charging, currbattery %d\n " << batteryMeter.getBatteryState() << std::endl;
+    //printf("start charging, currbattery %d\n", batteryMeter.getBatteryState());
     while (batteryMeter.getBatteryState() < batteryMeter.getmaxBattery() && total_steps < max_mission_steps) {
         batteryMeter.chargeBattery(1);
         total_steps++;
+        std::cout << "charging\n " << batteryMeter.getBatteryState() << std::endl;
+        std::cout << "total steps-while  \n " << total_steps << std::endl;
+
     }
-    printf("finish charging, currbattery %d\n", batteryMeter.getBatteryState());
-    printf("steps done %d \n", total_steps);
+    std::cout << "battery done charge   \n " << batteryMeter.getBatteryState() << std::endl;
+    std::cout << "total steps-done charging%d  \n " << total_steps << std::endl;
 }
 
     void Vacuum::logStep(Step step) {
