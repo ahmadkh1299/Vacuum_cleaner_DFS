@@ -53,7 +53,7 @@ void Vacuum::start() {
     while (total_steps < max_mission_steps && batteryMeter.getBatteryState() > 0) {
         if (batteryMeter.getBatteryState() <= history.size()) {
             std::stack<Step> path_to_docking = algorithm.findPathToDocking(history);
-            while ((!path_to_docking.empty()) && total_steps < max_mission_steps) {
+            while ((!path_to_docking.empty())  && total_steps<max_mission_steps) {
                 move(path_to_docking.top());
                 path_to_docking.pop();
                 if (!locatedAtDockingStation()) {
@@ -64,12 +64,14 @@ void Vacuum::start() {
                 chargeBattery();
                 history = std::stack<Step>();
             }
-        } else if (batteryMeter.getBatteryState() == batteryMeter.getmaxBattery() && total_steps>0) {
+
             // Return to last cleaned position after charging
-            while (!path_back_to_last_cleaned.empty() && total_steps < max_mission_steps) {
-                move(path_back_to_last_cleaned.top());
-                path_back_to_last_cleaned.pop();
-                update();
+            if((max_mission_steps-total_steps)>path_back_to_last_cleaned.size()) {
+                while (!path_back_to_last_cleaned.empty() && total_steps < max_mission_steps) {
+                    move(path_back_to_last_cleaned.top());
+                    path_back_to_last_cleaned.pop();
+                    update();
+                }
             }
         } else {
             Step nextStep = algorithm.nextStep();
@@ -109,6 +111,7 @@ void Vacuum::start() {
         }
     }
 }
+
 
 void Vacuum::outputResults(const std::string& output_file) const {
     std::ofstream file(output_file);
