@@ -118,6 +118,7 @@ void Vacuum::start() {
             case Step::Finish:
                 break;
         }
+        algorithm.updatePosition(current_location.first, current_location.second);
         batteryMeter.useBattery();
         return true;
     }
