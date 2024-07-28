@@ -1,6 +1,9 @@
 #include "MyAlgorithm.h"
 #include <iostream>
 #include <map>
+#include <unordered_map>
+#include <queue>
+#include <algorithm>
 
 MyAlgorithm::MyAlgorithm()
         : maxSteps(0), wallsSensor(nullptr), dirtSensor(nullptr), batteryMeter(nullptr),
@@ -27,7 +30,7 @@ void MyAlgorithm::setDockingStation(int Row, int Col) {
     dockingCol = Col;
 }
 
-void MyAlgorithm::initialize(int dockrow, int dockcol) {
+/*void MyAlgorithm::initialize(int dockrow, int dockcol) {
     if (isInitialized) return;
     isInitialized = true;
 
@@ -36,83 +39,160 @@ void MyAlgorithm::initialize(int dockrow, int dockcol) {
     historyStack.push({currentRow, currentCol});
     updateUnexplored(currentRow, currentCol);
     visited[{dockrow, dockcol}] = 20;
+}*/
+void MyAlgorithm::initialize(int dockrow, int dockcol) {
+    if (isInitialized) return;
+    isInitialized = true;
+
+    currentRow = dockrow;
+    currentCol = dockcol;
+    dockingRow = dockrow;
+    dockingCol = dockcol;
+    historyStack.push({currentRow, currentCol});
+    updateUnexplored(currentRow, currentCol);
+    visited[{currentRow, currentCol}] = 0;
 }
 
+/*
 Step MyAlgorithm::nextStep() {
     if (!isInitialized) {
         initialize(dockingRow, dockingCol);
     }
 
-    int remainingBattery = batteryMeter->getBatteryState();
-    if (remainingBattery <= historyStack.size()+2) {
-        return backtrackToDocking();
-    }
-
     int dirtLevel = dirtSensor->dirtLevel();
-    if (dirtLevel > 0 && dirtLevel <= 9) {
-        visited[{currentRow, currentCol}] = dirtLevel - 1;
+    std::pair<int, int> currentPos = {currentRow, currentCol};
+
+    if (dirtLevel > 0) {
+        std::cout << "Staying to clean at (" << currentRow << ", " << currentCol << "). Dirt level: " << dirtLevel << std::endl;
         return Step::Stay;
     }
 
-    if (visited.find({currentRow, currentCol}) == visited.end()) {
+    if (visited.find(currentPos) == visited.end() || visited[currentPos] > 0) {
+        visited[currentPos] = 0;  // Mark as fully cleaned
+        updateUnexplored(currentRow, currentCol);
+    }
+
+    return moveToNextCell();
+}
+*/
+Step MyAlgorithm::nextStep() {
+    if (!isInitialized) {
+        initialize(dockingRow, dockingCol);
+    }
+
+    int dirtLevel = dirtSensor->dirtLevel();
+    std::pair<int, int> currentPos = {currentRow, currentCol};
+
+    if (dirtLevel > 0) {
+        std::cout << "Staying to clean at (" << currentRow << ", " << currentCol << "). Dirt level: " << dirtLevel << std::endl;
+        return Step::Stay;
+    }
+
+    if (visited.find(currentPos) == visited.end()) {
+        visited[currentPos] = 0;
         updateUnexplored(currentRow, currentCol);
     }
 
     return moveToNextCell();
 }
 
+/*Step MyAlgorithm::moveToNextCell() {
+    std::pair<int, int> currentPos = {currentRow, currentCol};
+
+    // If there are unexplored directions from the current cell, explore them
+    if (!unexplored[currentPos].empty()) {
+        Direction dir = unexplored[currentPos].back();
+        unexplored[currentPos].pop_back();
+
+        int newRow = currentRow, newCol = currentCol;
+        Step step;
+
+        switch (dir) {
+            case Direction::North: newRow--; step = Step::North; break;
+            case Direction::East:  newCol++; step = Step::East;  break;
+            case Direction::South: newRow++; step = Step::South; break;
+            case Direction::West:  newCol--; step = Step::West;  break;
+        }
+
+        if (isValidMove(newRow, newCol)) {
+            currentRow = newRow;
+            currentCol = newCol;
+            historyStack.push({currentRow, currentCol});
+            std::cout << "Moving to (" << currentRow << ", " << currentCol << ")" << std::endl;
+            return step;
+        }
+    }
+
+    // If all directions from current cell are explored, backtrack
+    if (!historyStack.empty()) {
+        std::pair<int, int> prevPos = historyStack.top();
+        historyStack.pop();
+
+        Step backtrackStep;
+        if (prevPos.first < currentRow) backtrackStep = Step::North;
+        else if (prevPos.first > currentRow) backtrackStep = Step::South;
+        else if (prevPos.second < currentCol) backtrackStep = Step::West;
+        else backtrackStep = Step::East;
+
+        currentRow = prevPos.first;
+        currentCol = prevPos.second;
+        std::cout << "Backtracking to (" << currentRow << ", " << currentCol << ")" << std::endl;
+        return backtrackStep;
+    }
+
+    // If history stack is empty, we've explored everything
+    std::cout << "Exploration complete. Returning to docking station." << std::endl;
+    return Step::Finish;
+}*/
 Step MyAlgorithm::moveToNextCell() {
-    if (unexplored[{currentRow, currentCol}].empty()) {
-        return backtrack();// we need a function to start again in the cells not visited yet
+    std::pair<int, int> currentPos = {currentRow, currentCol};
+
+    if (!unexplored[currentPos].empty()) {
+        Direction dir = unexplored[currentPos].back();
+        unexplored[currentPos].pop_back();
+
+        int newRow = currentRow, newCol = currentCol;
+        Step step;
+
+        switch (dir) {
+            case Direction::North: newRow--; step = Step::North; break;
+            case Direction::East:  newCol++; step = Step::East;  break;
+            case Direction::South: newRow++; step = Step::South; break;
+            case Direction::West:  newCol--; step = Step::West;  break;
+        }
+
+        if (isValidMove(newRow, newCol)) {
+            currentRow = newRow;
+            currentCol = newCol;
+            historyStack.push({currentRow, currentCol});
+            std::cout << "Moving to (" << currentRow << ", " << currentCol << ")" << std::endl;
+            return step;
+        }
     }
 
-    Direction dir = unexplored[{currentRow, currentCol}].back();
-    unexplored[{currentRow, currentCol}].pop_back();
+    if (!historyStack.empty()) {
+        std::pair<int, int> prevPos = historyStack.top();
+        historyStack.pop();
 
-    switch (dir) {
-        case Direction::North:
-            if (isValidMove(currentRow - 1, currentCol)) {
-                currentRow--;
-                historyStack.push({currentRow, currentCol});
-                std::cout << "Moving North to (" << currentRow << ", " << currentCol << ")\n";
-                return Step::North;
-            }
-            break;
-        case Direction::East:
-            if (isValidMove(currentRow, currentCol + 1)) {
-                currentCol++;
-                historyStack.push({currentRow, currentCol});
-                std::cout << "Moving East to (" << currentRow << ", " << currentCol << ")\n";
-                return Step::East;
-            }
-            break;
-        case Direction::South:
-            if (isValidMove(currentRow + 1, currentCol)) {
-                currentRow++;
-                historyStack.push({currentRow, currentCol});
-                std::cout << "Moving South to (" << currentRow << ", " << currentCol << ")\n";
-                return Step::South;
-            }
-            break;
-        case Direction::West:
-            if (isValidMove(currentRow, currentCol - 1)) {
-                currentCol--;
-                historyStack.push({currentRow, currentCol});
-                std::cout << "Moving West to (" << currentRow << ", " << currentCol << ")\n";
-                return Step::West;
-            }
-            break;
+        Step backtrackStep;
+        if (prevPos.first < currentRow) backtrackStep = Step::North;
+        else if (prevPos.first > currentRow) backtrackStep = Step::South;
+        else if (prevPos.second < currentCol) backtrackStep = Step::West;
+        else backtrackStep = Step::East;
+
+        currentRow = prevPos.first;
+        currentCol = prevPos.second;
+        std::cout << "Backtracking to (" << currentRow << ", " << currentCol << ")" << std::endl;
+        return backtrackStep;
     }
-    return moveToNextCell();
+
+    std::cout << "Exploration complete. Returning to docking station." << std::endl;
+    return Step::Finish;
 }
-
 Step MyAlgorithm::backtrack() {
     if (historyStack.empty()) {
-        if (dockingCol==currentCol && dockingRow==currentRow)
-        { startcharging= true; }
         return moveToNextCell();// we need to charge , update battery , and start again
     }
-
     std::pair<int, int> prev = historyStack.top();
     historyStack.pop();
 
@@ -230,3 +310,66 @@ Step MyAlgorithm::reverseDirection(Step direction) {
             return Step::Stay;
     }
 }
+void MyAlgorithm::resetExploration() {
+    visited.clear();
+    unexplored.clear();
+    historyStack = std::stack<std::pair<int, int>>();
+    initialize(dockingRow, dockingCol);
+}
+
+std::vector<Step> MyAlgorithm::findPathToDock() {
+    std::queue<std::pair<int, int>> queue;
+    std::unordered_map<int, std::unordered_map<int, std::pair<int, int>>> cameFrom;
+    std::unordered_map<int, std::unordered_map<int, bool>> exploredCells;
+
+    queue.push({currentRow, currentCol});
+    exploredCells[currentRow][currentCol] = true;
+
+    while (!queue.empty()) {
+        auto current = queue.front();
+        queue.pop();
+
+        if (current.first == dockingRow && current.second == dockingCol) {
+            // Found the path, reconstruct it
+            return reconstructPath(cameFrom, current);
+        }
+
+        // Check all four directions
+        std::vector<std::pair<int, int>> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (const auto& dir : directions) {
+            int newRow = current.first + dir.first;
+            int newCol = current.second + dir.second;
+
+            if (!exploredCells[newRow][newCol] && !wallsSensor->isWall(directionFromOffset(dir))) {
+                queue.push({newRow, newCol});
+                exploredCells[newRow][newCol] = true;
+                cameFrom[newRow][newCol] = current;
+            }
+        }
+    }
+
+    // If we get here, there's no path to the docking station
+    return {};
+}
+std::vector<Step> MyAlgorithm::reconstructPath(
+        const std::unordered_map<int, std::unordered_map<int, std::pair<int, int>>>& cameFrom,
+        std::pair<int, int> current) {
+    std::vector<Step> path;
+    while (current.first != currentRow || current.second != currentCol) {
+        auto prev = cameFrom.at(current.first).at(current.second);
+        if (prev.first < current.first) path.push_back(Step::South);
+        else if (prev.first > current.first) path.push_back(Step::North);
+        else if (prev.second < current.second) path.push_back(Step::East);
+        else path.push_back(Step::West);
+        current = prev;
+    }
+    std::reverse(path.begin(), path.end());
+    return path;
+}
+Direction MyAlgorithm::directionFromOffset(const std::pair<int, int>& offset) {
+    if (offset.first == -1) return Direction::North;
+    if (offset.first == 1) return Direction::South;
+    if (offset.second == -1) return Direction::West;
+    return Direction::East;
+}
+

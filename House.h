@@ -16,7 +16,7 @@ public:
     int getCell(int row, int col) const;
     void cleanCell(int row, int col);
     bool isHouseClean() const;
-
+    int calculateTotalDirt() const;
     void printMatrix() const;
 
 private:
@@ -32,6 +32,7 @@ private:
     void initializeMatrix(const std::vector<std::string>& layout_v);
     void findDockingStation();
     void updateDirtCount();
+
 };
 
 #endif // HOUSE_H

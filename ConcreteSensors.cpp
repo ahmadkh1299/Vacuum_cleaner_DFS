@@ -50,3 +50,5 @@ void ConcreteBatteryMeter::chargeBattery(int stepsStayedAtDock) {
         currentBattery = maxBattery;
     }
 }
+int ConcreteBatteryMeter::getmaxBattery() const{ return maxBattery;}
+
