@@ -38,7 +38,7 @@ public:
 
 private:
     int maxBattery;
-    int currentBattery;
+    double currentBattery;
 
 };
 

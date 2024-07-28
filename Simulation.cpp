@@ -181,7 +181,7 @@ void Simulation::run() {
     vacuum.start();
     int finalDirtLeft = house.calculateTotalDirt();
     std::cout << "Final dirt left: " << finalDirtLeft << std::endl;
-    vacuum.outputResults("C:\\Users\\Mariam\\Desktop\\Vacuum_cleaner_DFS\\outputsimtxt");
+    vacuum.outputResults("C:\\Users\\97250\\Desktop\\TAU\\5th\\Advanced Programing\\22\\Vacuum_cleaner_DFS\\Vacuum_cleaner_DFS\\input1_output.txt");
     //writeOutputFile("C:\\Users\\Mariam\\Desktop\\Vacuum_cleaner_DFS\\outputsimtxt", finalDirtLeft);
 
 }
@@ -251,6 +251,34 @@ int Simulation::calculateDirtLeft() const {
     return totalDirt;
 }
 
+void Simulation::writeOutputFile(const std::string& outputFilePath, int finalDirtLeft) {
+    std::ofstream outputFile(outputFilePath);
+    if (!outputFile.is_open()) {
+        std::cerr << "Failed to open output file: " << outputFilePath << std::endl;
+        return;
+    }
+
+    int numSteps = steps; // assuming 'steps' is correctly tracking the number of steps taken
+    std::string status;
+    if (batteryMeter->getBatteryState() <= 0) {
+        status = "DEAD";
+    } else if (house.isHouseClean()) {
+        status = "FINISHED";
+    } else {
+        status = "WORKING";
+    }
+
+    outputFile << "NumSteps = " << numSteps << "\n";
+    outputFile << "DirtLeft = " << finalDirtLeft << "\n";
+    outputFile << "Status = " << status << "\n";
+    outputFile << "Steps:\n";
+
+    for (const Step& step : stepHistory) {
+        outputFile << stepToString(step);
+    }
+    outputFile.close();
+}
+
 std::string Simulation::stepToString(Step step) const {
     switch (step) {
         case Step::North: return "N";
@@ -261,24 +289,4 @@ std::string Simulation::stepToString(Step step) const {
         case Step::Finish: return "F";
         default: return "";
     }
-}
-void Simulation::writeOutputFile(const std::string& outputFilePath, int finalDirtLeft) {
-    std::ofstream outputFile(outputFilePath);
-    if (!outputFile.is_open()) {
-        std::cerr << "Failed to open output file: " << outputFilePath << std::endl;
-        return;
-    }
-
-    int dirtLeft = finalDirtLeft;
-    std::string status = (steps < maxSteps && batteryMeter->getBatteryState() > 0) ? "FINISHED" : "WORKING";
-
-    outputFile << "NumSteps = " << steps << "\n";
-    outputFile << "DirtLeft = " << dirtLeft << "\n";
-    outputFile << "Status = " << status << "\n";
-    outputFile << "Steps:\n";
-
-    for (const Step& step : stepHistory) {
-        outputFile << stepToString(step);
-    }
-    outputFile.close();
 }

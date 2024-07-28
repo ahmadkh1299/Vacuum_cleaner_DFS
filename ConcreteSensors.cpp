@@ -46,16 +46,16 @@ void ConcreteBatteryMeter::useBattery() {
 
     }
 }
-
 void ConcreteBatteryMeter::chargeBattery(int stepsStayedAtDock) {
     std::cout << "currentBattery (" << currentBattery << "=  " << std::endl;
-    int chargeRate = maxBattery / 20;
-    currentBattery += stepsStayedAtDock * chargeRate;
+    double chargeRate = maxBattery / 20.0;
+    currentBattery += (stepsStayedAtDock * chargeRate);
     if (currentBattery > maxBattery) {
         currentBattery = maxBattery;
     }
     std::cout << "currentBattery (" << currentBattery << "=  " << std::endl;
 
 }
+
 int ConcreteBatteryMeter::getmaxBattery() const{ return maxBattery;}
 
