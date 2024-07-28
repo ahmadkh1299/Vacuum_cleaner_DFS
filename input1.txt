@@ -1,6 +1,6 @@
 1-Small house
-MaxSteps = 100
-MaxBattery=20
+MaxSteps = 20
+MaxBattery=8
 Rows = 4
 Cols =10
 WW D

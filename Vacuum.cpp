@@ -70,7 +70,10 @@ void Vacuum::start() {
                 while (!path_back_to_last_cleaned.empty() && total_steps < max_mission_steps) {
                     move(path_back_to_last_cleaned.top());
                     path_back_to_last_cleaned.pop();
+                    std::cout << "update0 =" << total_steps << " " << std::endl;
                     update();
+                    std::cout << "update0 =" << total_steps << "  " << std::endl;
+
                 }
             }
         } else {
@@ -80,9 +83,11 @@ void Vacuum::start() {
                 int dirtLevel = dirtSensor.dirtLevel();
                 if (dirtLevel > 0) {
                     house.cleanCell(current_location.first, current_location.second);
-                    std::cout << "Cleaned cell at (" << current_location.first << ", " << current_location.second
+                    updatebat();
+                    /*std::cout << "Cleaned cell at (" << current_location.first << ", " << current_location.second
                               << "). New dirt level: " << dirtSensor.dirtLevel() << std::endl;
-                }
+                */
+                     }
             } else if (nextStep == Step::Finish) {
                 if (!house.isHouseClean()) {
                     std::cout << "House not fully clean. Continuing exploration." << std::endl;
@@ -98,9 +103,10 @@ void Vacuum::start() {
 
             // Record path for returning to the last cleaned cell after charging
             path_back_to_last_cleaned = history;
-
-            updatebat();
+            std::cout << "updatea=" << total_steps << "" << std::endl;
+            //updatebat();
             total_steps++;
+            std::cout << "updatea=" << total_steps << " " << std::endl;
             wallsSensor.updatePosition(current_location.first, current_location.second);
             dirtSensor.updatePosition(current_location.first, current_location.second);
 
