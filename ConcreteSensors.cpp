@@ -1,3 +1,4 @@
+#include <iostream>
 #include "ConcreteSensors.h"
 
 ConcreteWallsSensor::ConcreteWallsSensor(const House& house, int row, int col)
@@ -39,16 +40,22 @@ std::size_t ConcreteBatteryMeter::getBatteryState() const {
 
 void ConcreteBatteryMeter::useBattery() {
     if (currentBattery > 0) {
-        --currentBattery;
+        std::cout << "currentBattery (" << currentBattery << "=  " << std::endl;
+        currentBattery--;
+        std::cout << "currentBattery (" << currentBattery << "=  " << std::endl;
+
     }
 }
-
 void ConcreteBatteryMeter::chargeBattery(int stepsStayedAtDock) {
-    int chargeRate = maxBattery / 20;
-    currentBattery += stepsStayedAtDock * chargeRate;
+    std::cout << "currentBattery (" << currentBattery << "=  " << std::endl;
+    double chargeRate = maxBattery / 20.0;
+    currentBattery += (stepsStayedAtDock * chargeRate);
     if (currentBattery > maxBattery) {
         currentBattery = maxBattery;
     }
+    std::cout << "currentBattery (" << currentBattery << "=  " << std::endl;
+
 }
+
 int ConcreteBatteryMeter::getmaxBattery() const{ return maxBattery;}
 

@@ -1,5 +1,5 @@
 #ifndef CHATGPT_VACUUM_H
-#define CHATGPT_VACUUM_H
+#define CHATGPT_VACUM_H
 
 #include "MyAlgorithm.h"
 #include "ConcreteSensors.h"
@@ -11,13 +11,16 @@
 
 class Vacuum {
 public:
-    Vacuum(MyAlgorithm& Myalgo, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps,House& house);
-
+    Vacuum(MyAlgorithm& Myalgo, ConcreteWallsSensor& wallsSensor, ConcreteDirtSensor& dirtSensor, ConcreteBatteryMeter& batteryMeter, int max_mission_steps, House& house);
     Vacuum(AbstractAlgorithm &algorithm, ConcreteWallsSensor &wallsSensor, ConcreteDirtSensor &dirtSensor,
            ConcreteBatteryMeter &batteryMeter, int max_mission_steps, House &house);
 
     void outputResults(const std::string& output_file) const;
     void start();
+
+    // New public getters
+    const std::vector<std::string>& getLog() const;
+    const ConcreteBatteryMeter& getBatteryMeter() const;
 
 private:
     MyAlgorithm& algorithm;
@@ -29,6 +32,7 @@ private:
     int total_steps;
     std::pair<int, int> current_location;
     std::stack<Step> history;
+    std::vector<std::string> log;
 
     std::pair<int, int> getCurrentLocation() const { return current_location; }
     int getX() const { return current_location.first; }
@@ -43,8 +47,6 @@ private:
     void logStep(Step step);
     bool locatedAtDockingStation() const;
     void update();
-    std::vector<std::string> log;
-
     void updatebat();
 };
 

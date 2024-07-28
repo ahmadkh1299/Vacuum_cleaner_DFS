@@ -16,9 +16,7 @@ public:
     bool readHouseFile(const std::string& houseFilePath);
     void setAlgorithm(AbstractAlgorithm& algo);
     void run();
-    void writeOutputFile(const std::string& outputFilePath);
-    void writeOutputFile(const std::string &outputFilePath, int finalDirtLeft);
-
+    void writeOutputFile(const std::string& outputFilePath, int finalDirtLeft, const Vacuum& vacuum);
 
 private:
     House house;
@@ -29,15 +27,12 @@ private:
     std::unique_ptr<ConcreteBatteryMeter> batteryMeter;
     AbstractAlgorithm* algorithm;
     int currentRow, currentCol;
-    int steps;
-    std::vector<Step> stepHistory;
 
     void moveRobot(Step d);
     bool isHouseClean() const;
     bool atDockingStation() const;
     int calculateDirtLeft() const;
     std::string stepToString(Step step) const;
-
 };
 
 #endif // SIMULATION_H

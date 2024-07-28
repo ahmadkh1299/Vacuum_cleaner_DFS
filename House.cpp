@@ -149,7 +149,7 @@ void House::cleanCell(int row, int col) {
         if (house_matrix[row][col] > 0 && house_matrix[row][col] < 20) {
             house_matrix[row][col]--;
             total_dirt--;
-            std::cout << "Cleaned cell at (" << row << ", " << col
+            std::cout << "Cleaned cell at house (" << row << ", " << col
                       << "). New dirt level: " << house_matrix[row][col] << std::endl;
         }
     }
